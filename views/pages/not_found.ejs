@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<%- include('../partials/head') %>
+
+<body class="bg-gray-50">
+  <%- include('../partials/navbar') %>
+
+  <main class="min-h-screen flex items-center justify-center">
+    <div class="container mx-auto px-6">
+      <div class="text-center max-w-2xl mx-auto">
+        <div class="mb-8 relative">
+          <div class="absolute inset-0 bg-purple-100 rounded-full transform -rotate-6"></div>
+          <div class="relative">
+            <i data-lucide="package-x" class="w-32 h-32 mx-auto text-purple-600"></i>
+          </div>
+        </div>
+
+        <h1 class="text-4xl font-bold mb-4">Page Not Found</h1>
+        <p class="text-gray-600 text-lg mb-8">
+          Oops! The page you're looking for seems to have gone shopping elsewhere.
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <button onclick="window.history.back()" class="inline-flex items-center justify-center gap-2 bg-white border border-purple-600 text-purple-600 px-6 py-3 rounded-lg hover:bg-purple-50 transition-colors">
+            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+            Go Back
+          </button>
+          <a href="/" class="inline-flex items-center justify-center gap-2 bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors">
+            <i data-lucide="home" class="w-5 h-5"></i>
+            Return Home
+          </a>
+        </div>
+
+        <div class="mt-12">
+          <h2 class="text-lg font-medium mb-4">You might be interested in:</h2>
+          <div class="grid sm:grid-cols-2 gap-4 max-w-lg mx-auto">
+            <a href="/shop" class="flex items-center gap-3 p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+              <div class="bg-purple-100 p-2 rounded-lg">
+                <i data-lucide="shopping-bag" class="w-5 h-5 text-purple-600"></i>
+              </div>
+              <span class="font-medium">Browse Products</span>
+            </a>
+            <a href="/#services" class="flex items-center gap-3 p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+              <div class="bg-purple-100 p-2 rounded-lg">
+                <i data-lucide="wrench" class="w-5 h-5 text-purple-600"></i>
+              </div>
+              <span class="font-medium">Services</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+
+<%- include('../partials/footer') %>
+
+</html>

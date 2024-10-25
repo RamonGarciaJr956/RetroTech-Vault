@@ -1,0 +1,84 @@
+<div class="lg:w-1/4">
+  <div class="bg-white rounded-lg shadow-lg p-6 sticky top-24">
+    <h2 class="text-lg font-bold mb-4">Filters</h2>
+
+    <div class="mb-6">
+      <div class="relative">
+        <input type="text" placeholder="Search products..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent">
+        <div class="absolute left-3 top-2.5 text-gray-400">
+          <i class="w-5 h-5" data-lucide="search"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-6">
+      <h3 class="font-semibold mb-3">Console Type</h3>
+      <div class="space-y-2">
+        <label class="flex items-center">
+          <input type="checkbox" class="rounded border-gray-300 text-purple-600 focus:ring-purple-600">
+          <span class="ml-2 text-gray-700">Nintendo (12)</span>
+        </label>
+        <label class="flex items-center">
+          <input type="checkbox" class="rounded border-gray-300 text-purple-600 focus:ring-purple-600">
+          <span class="ml-2 text-gray-700">Sega (8)</span>
+        </label>
+        <label class="flex items-center">
+          <input type="checkbox" class="rounded border-gray-300 text-purple-600 focus:ring-purple-600">
+          <span class="ml-2 text-gray-700">PlayStation (10)</span>
+        </label>
+        <label class="flex items-center">
+          <input type="checkbox" class="rounded border-gray-300 text-purple-600 focus:ring-purple-600">
+          <span class="ml-2 text-gray-700">Atari (6)</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="mb-6">
+      <h3 class="font-semibold mb-3">Price Range</h3>
+      <div class="space-y-2">
+        <label class="flex items-center">
+          <input type="radio" name="price" class="text-purple-600 focus:ring-purple-600">
+          <span class="ml-2 text-gray-700">Under $100</span>
+        </label>
+        <label class="flex items-center">
+          <input type="radio" name="price" class="text-purple-600 focus:ring-purple-600">
+          <span class="ml-2 text-gray-700">$100 - $200</span>
+        </label>
+        <label class="flex items-center">
+          <input type="radio" name="price" class="text-purple-600 focus:ring-purple-600">
+          <span class="ml-2 text-gray-700">$200 - $300</span>
+        </label>
+        <label class="flex items-center">
+          <input type="radio" name="price" class="text-purple-600 focus:ring-purple-600">
+          <span class="ml-2 text-gray-700">$300+</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="mb-6">
+      <h3 class="font-semibold mb-3">Condition</h3>
+      <div class="space-y-2">
+        <label class="flex items-center">
+          <input type="checkbox" class="rounded border-gray-300 text-purple-600 focus:ring-purple-600">
+          <span class="ml-2 text-gray-700">Mint (5)</span>
+        </label>
+        <label class="flex items-center">
+          <input type="checkbox" class="rounded border-gray-300 text-purple-600 focus:ring-purple-600">
+          <span class="ml-2 text-gray-700">Excellent (15)</span>
+        </label>
+        <label class="flex items-center">
+          <input type="checkbox" class="rounded border-gray-300 text-purple-600 focus:ring-purple-600">
+          <span class="ml-2 text-gray-700">Good (8)</span>
+        </label>
+      </div>
+    </div>
+
+    <button class="w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition-colors duration-300">
+      Apply Filters
+    </button>
+  </div>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</div>

@@ -1,0 +1,39 @@
+<div class="bg-white rounded-lg shadow-lg overflow-hidden group">
+  <div class="relative">
+    <img src="<%= product.image %>" alt="Sega Genesis" class="w-full h-48 object-cover">
+    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-300"></div>
+    <button class="absolute top-4 right-4 bg-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+      <i class="w-5 h-5 text-gray-600" data-lucide="heart"></i>
+    </button>
+    <% if (product.isBestSeller) { %>
+    <div class="absolute top-4 left-4 bg-purple-600 text-white text-xs px-2 py-1 rounded">
+      Best Seller
+    </div>
+    <% } %>
+  </div>
+  <div class="p-4">
+    <h3 class="font-bold mb-2"><%= product.name %></h3>
+    <p class="text-gray-600 text-sm mb-2"><%= product.description %></p>
+    <div class="flex items-center mb-4">
+      <div class="flex text-yellow-400">
+        <% for(let x = 0; x < product.rating; x++){ %>
+          <i class="w-4 h-4 fill-yellow-400" data-lucide="star"></i>
+        <% } %>
+        <% for(let x = 0; x < (5-product.rating); x++){ %>
+          <i class="w-4 h-4 text-gray-300" data-lucide="star"></i>
+        <% } %>
+      </div>
+      <span class="text-sm text-gray-500 ml-2">(<%= product.number_of_ratings %> reviews)</span>
+    </div>
+    <div class="flex items-center justify-between">
+      <span class="text-xl font-bold text-purple-600">$<%= product.price %></span>
+      <button class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors duration-300">
+        Add to Cart
+      </button>
+    </div>
+  </div>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</div>

@@ -1,0 +1,77 @@
+<nav class="fixed w-full z-50 bg-gray-900/80 backdrop-blur-md border-b border-white/10">
+  <div class="container mx-auto px-6">
+    <div class="flex justify-between items-center h-16">
+      <a href="/" class="flex items-center space-x-3 group">
+        <div class="relative">
+          <div class="absolute inset-0 bg-purple-600/20 rounded-full blur group-hover:blur-xl transition-all duration-300"></div>
+          <img src="/logo v2.png" alt="RetroTech Vault" class="w-8 h-8 relative">
+        </div>
+        <span class="text-xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+          RetroTech Vault
+        </span>
+      </a>
+
+      <div class="hidden md:flex items-center space-x-1">
+        <a href="/" class="relative px-3 py-2 text-sm font-medium text-white group">
+          <span>Home</span>
+          <span class="absolute inset-x-0 bottom-0 h-0.5 bg-purple-600 scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
+        </a>
+        <a href="/#services" class="relative px-3 py-2 text-sm font-medium text-white group">
+          <span>Services</span>
+          <span class="absolute inset-x-0 bottom-0 h-0.5 bg-purple-600 scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
+        </a>
+        <a href="/shop" class="relative px-3 py-2 text-sm font-medium text-white group">
+          <span>Shop</span>
+          <span class="absolute inset-x-0 bottom-0 h-0.5 bg-purple-600 scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
+        </a>
+        <a href="/#about" class="relative px-3 py-2 text-sm font-medium text-white group">
+          <span>About</span>
+          <span class="absolute inset-x-0 bottom-0 h-0.5 bg-purple-600 scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
+        </a>
+        <a href="/#contact" class="relative px-3 py-2 text-sm font-medium text-white group">
+          <span>Contact</span>
+          <span class="absolute inset-x-0 bottom-0 h-0.5 bg-purple-600 scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
+        </a>
+
+        <div class="pl-6">
+          <a href="/login" class="bg-purple-600/20 hover:bg-purple-600 text-purple-300 hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center space-x-2 group">
+            <span>Sign In</span>
+            <i class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" data-lucide="arrow-right"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="flex items-center md:hidden space-x-4">
+        <button class="bg-gray-800/50 p-2 rounded-lg hover:bg-gray-800 transition-colors duration-300" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
+          <i class="w-5 h-5 text-gray-300" data-lucide="menu"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="mobile-menu" class="hidden md:hidden border-t border-white/10">
+    <div class="container mx-auto px-6 py-4 space-y-2">
+      <a href="/" class="block px-3 py-2 text-base font-medium text-white hover:bg-white/10 rounded-lg transition-colors duration-300">
+        Home
+      </a>
+      <a href="/#services" class="block px-3 py-2 text-base font-medium text-white hover:bg-white/10 rounded-lg transition-colors duration-300">
+        Services
+      </a>
+      <a href="#" class="block px-3 py-2 text-base font-medium text-white hover:bg-white/10 rounded-lg transition-colors duration-300">
+        Shop
+      </a>
+      <a href="/#about" class="block px-3 py-2 text-base font-medium text-white hover:bg-white/10 rounded-lg transition-colors duration-300">
+        About
+      </a>
+      <a href="/#contact" class="block px-3 py-2 text-base font-medium text-white hover:bg-white/10 rounded-lg transition-colors duration-300">
+        Contact
+      </a>
+      <div class="pt-4">
+        <a href="/login" class="w-full bg-purple-600 text-white px-4 py-2 rounded-lg text-base font-medium hover:bg-purple-700 transition-colors duration-300 flex items-center justify-center space-x-2">
+          <span>Sign In</span>
+          <i class="w-4 h-4" data-lucide="arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>

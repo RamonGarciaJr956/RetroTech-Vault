@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<%- include('../partials/head') %>
+
+<body class="bg-gray-50">
+
+  <%- include('../partials/navbar') %>
+
+  <main class="py-32">
+    <div class="container mx-auto px-6">
+      <!-- Product Hero Section -->
+      <div class="flex flex-col lg:flex-row gap-12 mb-16">
+        <!-- Product Images -->
+        <div class="lg:w-1/2">
+          <div class="bg-white rounded-lg p-6 shadow-sm">
+            <img src="/api/placeholder/600/600" alt="Product Image" class="w-full rounded-lg" />
+            <div class="grid grid-cols-4 gap-4 mt-4">
+              <img src="/api/placeholder/120/120" alt="Thumbnail 1" class="rounded-lg cursor-pointer hover:opacity-75" />
+              <img src="/api/placeholder/120/120" alt="Thumbnail 2" class="rounded-lg cursor-pointer hover:opacity-75" />
+              <img src="/api/placeholder/120/120" alt="Thumbnail 3" class="rounded-lg cursor-pointer hover:opacity-75" />
+              <img src="/api/placeholder/120/120" alt="Thumbnail 4" class="rounded-lg cursor-pointer hover:opacity-75" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Product Info -->
+        <div class="lg:w-1/2">
+          <h1 class="text-3xl font-bold mb-4">Product Name</h1>
+          <div class="flex items-center gap-2 mb-4">
+            <div class="flex text-yellow-400">
+              <i data-lucide="star" class="w-5 h-5"></i>
+              <i data-lucide="star" class="w-5 h-5"></i>
+              <i data-lucide="star" class="w-5 h-5"></i>
+              <i data-lucide="star" class="w-5 h-5"></i>
+              <i data-lucide="star" class="w-5 h-5"></i>
+            </div>
+            <span class="text-gray-600">(128 reviews)</span>
+          </div>
+          <p class="text-2xl font-bold text-purple-600 mb-6">$99.99</p>
+          <div class="prose prose-gray mb-6">
+            <p>Brief product description goes here. This should be a quick overview of what makes this product special.</p>
+          </div>
+          <button class="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 transition-colors mb-4">
+            Add to Cart
+          </button>
+          <button class="w-full border border-purple-600 text-purple-600 py-3 rounded-lg hover:bg-purple-50 transition-colors">
+            Add to Wishlist
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabs Navigation -->
+      <div class="border-b border-gray-200 mb-8">
+        <div class="flex gap-8">
+          <button class="border-b-2 border-purple-600 text-purple-600 pb-4 font-medium">About</button>
+          <button class="text-gray-600 pb-4 font-medium">Features</button>
+          <button class="text-gray-600 pb-4 font-medium">Reviews</button>
+          <button class="text-gray-600 pb-4 font-medium">Shipping</button>
+        </div>
+      </div>
+
+      <!-- About Section -->
+      <div class="mb-16">
+        <div class="prose prose-gray max-w-none">
+          <h2 class="text-2xl font-bold mb-4">About This Item</h2>
+          <p>Detailed product description goes here. This section should include comprehensive information about the product, its uses, and benefits. Include multiple paragraphs if necessary.</p>
+          <p>Additional details about materials, construction, or other relevant information can be included here.</p>
+        </div>
+      </div>
+
+      <!-- Features Section -->
+      <div class="mb-16">
+        <h2 class="text-2xl font-bold mb-6">Key Features</h2>
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="flex gap-4 items-start">
+            <div class="bg-purple-100 p-3 rounded-lg">
+              <i data-lucide="check" class="w-6 h-6 text-purple-600"></i>
+            </div>
+            <div>
+              <h3 class="font-bold mb-2">Feature 1</h3>
+              <p class="text-gray-600">Description of feature 1 and its benefits.</p>
+            </div>
+          </div>
+          <div class="flex gap-4 items-start">
+            <div class="bg-purple-100 p-3 rounded-lg">
+              <i data-lucide="check" class="w-6 h-6 text-purple-600"></i>
+            </div>
+            <div>
+              <h3 class="font-bold mb-2">Feature 2</h3>
+              <p class="text-gray-600">Description of feature 2 and its benefits.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reviews Section -->
+      <div class="mb-16">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-bold">Customer Reviews</h2>
+          <button class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+            Write a Review
+          </button>
+        </div>
+
+        <div class="grid gap-6">
+          <!-- Single Review -->
+          <div class="bg-white p-6 rounded-lg shadow-sm">
+            <div class="flex justify-between items-start mb-4">
+              <div>
+                <div class="flex text-yellow-400 mb-2">
+                  <i data-lucide="star-solid" class="w-5 h-5"></i>
+                  <i data-lucide="star-solid" class="w-5 h-5"></i>
+                  <i data-lucide="star-solid" class="w-5 h-5"></i>
+                  <i data-lucide="star-solid" class="w-5 h-5"></i>
+                  <i data-lucide="star-solid" class="w-5 h-5"></i>
+                </div>
+                <h3 class="font-bold">Great Product!</h3>
+              </div>
+              <span class="text-gray-600 text-sm">2 days ago</span>
+            </div>
+            <p class="text-gray-600 mb-4">Review content goes here. This should be the customer's detailed feedback about the product.</p>
+            <div class="flex items-center gap-2">
+              <img src="/api/placeholder/32/32" alt="User" class="rounded-full" />
+              <span class="font-medium">John Doe</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shipping Section -->
+      <div>
+        <h2 class="text-2xl font-bold mb-6">Shipping Information</h2>
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="bg-white p-6 rounded-lg shadow-sm">
+            <div class="flex gap-4 items-start">
+              <i data-lucide="truck" class="w-6 h-6 text-purple-600"></i>
+              <div>
+                <h3 class="font-bold mb-2">Free Shipping</h3>
+                <p class="text-gray-600">Orders over $50 qualify for free shipping</p>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white p-6 rounded-lg shadow-sm">
+            <div class="flex gap-4 items-start">
+              <i data-lucide="package" class="w-6 h-6 text-purple-600"></i>
+              <div>
+                <h3 class="font-bold mb-2">Returns</h3>
+                <p class="text-gray-600">Easy 30-day return policy</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+
+</html>

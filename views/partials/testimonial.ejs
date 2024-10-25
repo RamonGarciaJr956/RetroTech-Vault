@@ -1,0 +1,19 @@
+<div class="bg-white p-6 rounded-lg shadow">
+  <div class="flex items-center mb-4">
+    <div class="text-purple-600 mr-4">
+      <i class="w-12 h-12" data-lucide="user"></i>
+    </div>
+    <div>
+      <h3 class="font-bold"><%= testimonial.name %></h3>
+      <div class="text-yellow-400 flex">
+        <% for(let x = 0; x < testimonial.rating; x++){ %>
+            <i class="w-4 h-4 fill-yellow-400" data-lucide="star"></i>
+        <% } %>
+        <% for(let x = 0; x < (5-testimonial.rating); x++){ %>
+            <i class="w-4 h-4 text-gray-300" data-lucide="star"></i>
+        <% } %>
+      </div>
+    </div>
+  </div>
+  <p class="text-gray-600">"<%= testimonial.message %>"</p>
+</div>
