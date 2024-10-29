@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<%- include('../partials/head') %>
+
+<body class="bg-gray-50">
+
+  <%- include('../partials/navbar') %>
+
+  <style>
+    #about,
+    #features {
+      scroll-margin-top: calc(50vh - 64px);
+    }
+  </style>
+
+  <main class="py-32">
+    <div class="container mx-auto px-6">
+
+      <div class="flex flex-col lg:flex-row gap-12 mb-16">
+
+        <div class="lg:w-1/2">
+          <div class="bg-white rounded-lg p-6 shadow-sm">
+            <img src="<%= product.mainImageUrl %>" alt="Product Image" class="rounded-lg object-cover w-full" />
+            <div class="grid grid-cols-4 gap-4 mt-4">
+              <% product.images.forEach(function(image) { %>
+              <img src="<%= image.imageUrl %>" alt="Thumbnail" class="rounded-lg cursor-pointer hover:opacity-75" />
+              <% }) %>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:w-1/2">
+          <h1 class="text-3xl font-bold mb-4"><%= product.name %></h1>
+
+          <div class="flex gap-4 mb-4">
+            <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+              <%= product.consoleType %>
+            </span>
+            <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+              <%= product.condition %>
+            </span>
+          </div>
+
+          <div class="flex items-center gap-2 mb-4">
+            <div class="flex text-yellow-400">
+              <% for(let x = 0; x < product.rating; x++){ %>
+              <i class="w-4 h-4 fill-yellow-400" data-lucide="star"></i>
+              <% } %>
+              <% for(let x = 0; x < (5-product.rating); x++){ %>
+              <i class="w-4 h-4 text-gray-300" data-lucide="star"></i>
+              <% } %>
+            </div>
+            <span class="text-gray-600">(<%= product.reviewCount %> reviews)</span>
+          </div>
+          <p class="text-2xl font-bold text-purple-600 mb-6">$<%= product.price %></p>
+
+          <div class="bg-gray-50 rounded-lg p-4 mb-6">
+            <table class="w-full">
+              <tbody>
+                <tr class="border-b border-gray-200">
+                  <td class="py-2 text-gray-600">Console</td>
+                  <td class="py-2 font-medium text-right"><%= product.consoleType %></td>
+                </tr>
+                <tr class="border-b border-gray-200">
+                  <td class="py-2 text-gray-600">Condition</td>
+                  <td class="py-2 font-medium text-right"><%= product.condition %></td>
+                </tr>
+                <tr>
+                  <td class="py-2 text-gray-600">Stock</td>
+                  <td class="py-2 font-medium text-right"><%= product.stockCount %> available</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="prose prose-gray mb-6">
+            <p><%= product.shortDescription %></p>
+          </div>
+
+          <button onclick="addToCart('<%= product.id %>')" class="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 transition-colors mb-4">
+            Add to Cart
+          </button>
+          <button onclick="addToWishList('<%= product.id %>')" class="w-full border border-purple-600 text-purple-600 py-3 rounded-lg hover:bg-purple-50 transition-colors">
+            Add to Wishlist
+          </button>
+        </div>
+      </div>
+
+      <div class="border-b border-gray-200 mb-8">
+        <div class="flex gap-8">
+          <a href="#about" class="text-gray-600 pb-4 font-medium">About</a>
+          <a href="#features" class="text-gray-600 pb-4 font-medium">Features</a>
+          <a href="#reviews" class="text-gray-600 pb-4 font-medium">Reviews</a>
+          <a href="#shipping" class="text-gray-600 pb-4 font-medium">Shipping</a>
+        </div>
+      </div>
+
+      <div class="mb-16" id="about">
+        <div class="prose prose-gray max-w-none">
+          <h2 class="text-2xl font-bold mb-4">About This Item</h2>
+          <p><%= product.description %></p>
+
+          <div class="bg-white p-6 rounded-lg shadow-sm mt-6">
+            <h3 class="text-xl font-bold mb-4">Condition Details</h3>
+            <div class="grid gap-4">
+              <div class="flex items-start gap-4">
+                <i data-lucide="info" class="w-6 h-6 text-purple-600"></i>
+                <div>
+                  <h4 class="font-medium mb-1">Condition: <%= product.condition %></h4>
+                  <p class="text-gray-600"><%= product.conditionDescription %></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-16" id="features">
+        <h2 class="text-2xl font-bold mb-6">Key Features</h2>
+        <div class="grid md:grid-cols-2 gap-6">
+          <% product.features.forEach(function(feature) { %>
+          <div class="flex gap-4 items-start">
+            <div class="bg-purple-100 p-3 rounded-lg">
+              <i data-lucide="check" class="w-6 h-6 text-purple-600"></i>
+            </div>
+            <div>
+              <h3 class="font-bold mb-2"><%= feature.title %></h3>
+              <p class="text-gray-600"><%= feature.description %></p>
+            </div>
+          </div>
+          <% }); %>
+        </div>
+      </div>
+
+      <div class="mb-16" id="reviews">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-bold">Customer Reviews</h2>
+          <button class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+            Write a Review
+          </button>
+        </div>
+
+        <div class="grid gap-6">
+          <% product.reviews.forEach(function(review) { %>
+          <div class="bg-white p-6 rounded-lg shadow-sm">
+            <div class="flex justify-between items-start mb-4">
+              <div>
+                <div class="flex text-yellow-400 mb-2">
+                  <% for(let x = 0; x < review.rating; x++){ %>
+                  <i class="w-4 h-4 fill-yellow-400" data-lucide="star"></i>
+                  <% } %>
+                  <% for(let x = 0; x < (5-review.rating); x++){ %>
+                  <i class="w-4 h-4 text-gray-300" data-lucide="star"></i>
+                  <% } %>
+                </div>
+                <h3 class="font-bold"><%= review.title %></h3>
+              </div>
+              <span class="text-gray-600 text-sm"><%= review.date %></span>
+            </div>
+            <p class="text-gray-600 mb-4"><%= review.content %></p>
+            <div class="flex items-center gap-2">
+              <span class="font-medium"><%= review.userName %></span>
+            </div>
+          </div>
+          <% }); %>
+        </div>
+      </div>
+
+      <div id="shipping">
+        <h2 class="text-2xl font-bold mb-6">Shipping Information</h2>
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="bg-white p-6 rounded-lg shadow-sm">
+            <div class="flex gap-4 items-start">
+              <i data-lucide="truck" class="w-6 h-6 text-purple-600"></i>
+              <div>
+                <h3 class="font-bold mb-2">Free Shipping</h3>
+                <p class="text-gray-600">Orders over $50 qualify for free shipping</p>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white p-6 rounded-lg shadow-sm">
+            <div class="flex gap-4 items-start">
+              <i data-lucide="package" class="w-6 h-6 text-purple-600"></i>
+              <div>
+                <h3 class="font-bold mb-2">Returns</h3>
+                <p class="text-gray-600">Easy 30-day return policy</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    lucide.createIcons();
+
+    async function addToCart(productId) {
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+      if (cart.find(p => p.id === productId)) {
+        return;
+      }
+
+      cart.push({
+        id: productId
+      });
+
+      localStorage.setItem('cart', JSON.stringify(cart));
+    }
+
+    async function addToWishList(productId) {
+      const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+
+      if (wishlist.find(p => p.id === productId)) {
+        return;
+      }
+
+      wishlist.push({
+        id: productId
+      });
+
+      localStorage.setItem('wishlist', JSON.stringify(wishlist));
+    }
+  </script>
+</body>
+
+</html>

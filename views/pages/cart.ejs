@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<%- include('../partials/head') %>
+
+<body class="bg-gray-50">
+
+  <%- include('../partials/navbar') %>
+
+  <section class="py-32 min-h-screen">
+    <div class="container mx-auto px-6">
+      <div class="flex flex-col lg:flex-row gap-8">
+
+        <div class="lg:w-2/3">
+
+          <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+            <h2 class="text-2xl font-semibold mb-6">Shopping Cart</h2>
+
+            <div class="space-y-4" id="cartList"></div>
+          </div>
+
+          <div class="bg-white rounded-lg shadow-sm p-6">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-2xl font-semibold">Wishlist</h2>
+              <span class="text-gray-600" id="wishListCount">? items</span>
+            </div>
+
+            <div class="space-y-4" id="wishList"></div>
+          </div>
+        </div>
+
+        <div class="lg:w-1/3">
+          <div class="bg-white rounded-lg shadow-sm p-6">
+            <h2 class="text-2xl font-semibold mb-6">Order Summary</h2>
+
+            <div class="space-y-4">
+              <div class="flex justify-between">
+                <p class="text-gray-600">Subtotal</p>
+                <p class="font-semibold">$249.98</p>
+              </div>
+              <div class="flex justify-between">
+                <p class="text-gray-600">Shipping</p>
+                <p class="font-semibold">$9.99</p>
+              </div>
+              <div class="flex justify-between">
+                <p class="text-gray-600">Tax</p>
+                <p class="font-semibold">$25.00</p>
+              </div>
+              <div class="border-t pt-4">
+                <div class="flex justify-between">
+                  <p class="font-semibold">Total</p>
+                  <p class="font-semibold">$284.97</p>
+                </div>
+              </div>
+            </div>
+
+            <form class="mt-8 space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input type="email" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-600 focus:border-transparent">
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Card Number</label>
+                <input type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-600 focus:border-transparent">
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Expiry Date</label>
+                  <input type="text" placeholder="MM/YY" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-600 focus:border-transparent">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">CVC</label>
+                  <input type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-600 focus:border-transparent">
+                </div>
+              </div>
+
+              <button class="w-full bg-purple-600 text-white rounded-lg px-4 py-2 hover:bg-purple-700 transition-colors">
+                Place Order
+              </button>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const updateQuantity = (productId, quantity) => {
+      const cartData = JSON.parse(localStorage.getItem('cart')) || [];
+      const productIndex = cartData.findIndex(item => item.id === productId);
+      if (productIndex !== -1) {
+        cartData[productIndex].quantity = parseInt(quantity);
+        localStorage.setItem('cart', JSON.stringify(cartData));
+      }
+    };
+
+    const removeFromCart = (productId) => {
+      const cartData = JSON.parse(localStorage.getItem('cart')) || [];
+      const updatedCart = cartData.filter(item => item.id !== productId);
+      localStorage.setItem('cart', JSON.stringify(updatedCart));
+      document.querySelector(`[data-product-id="${productId}"]`)?.remove();
+    };
+
+    const moveToWishlist = async (productId) => {
+      const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+      wishlist.push({"id": productId});
+      localStorage.setItem('wishlist', JSON.stringify(wishlist));
+      removeFromCart(productId);
+    };
+
+    const removeFromWishlist = (productId) => {
+      const wishlistData = JSON.parse(localStorage.getItem('wishlist')) || [];
+      const updatedWishlist = wishlistData.filter(item => item.id !== productId);
+      localStorage.setItem('wishlist', JSON.stringify(updatedWishlist));
+      
+      document.querySelector(`[data-wishlist-product-id="${productId}"]`)?.remove();
+    };
+
+    const addToCart = async (productId) => {
+      const cartData = JSON.parse(localStorage.getItem('cart')) || [];
+      const wishlistData = JSON.parse(localStorage.getItem('wishlist')) || [];
+      
+      const existingProduct = cartData.find(item => item.id === productId);
+      
+      if (existingProduct) {
+        existingProduct.quantity = (existingProduct.quantity || 1) + 1;
+      } else {
+        cartData.push({
+          id: productId,
+          quantity: 1
+        });
+      }
+      
+      localStorage.setItem('cart', JSON.stringify(cartData));
+      
+      const updatedWishlist = wishlistData.filter(item => item.id !== productId);
+      localStorage.setItem('wishlist', JSON.stringify(updatedWishlist));
+      
+      document.querySelector(`[data-wishlist-product-id="${productId}"]`)?.remove();
+    };
+
+    const cartElement = document.getElementById('cartList');
+    const wishElement = document.getElementById('wishList')
+    const cartString = localStorage.getItem('cart');
+
+    if (cartString) {
+      const cart = JSON.parse(cartString);
+
+      cart.forEach(async (rawProduct) => {
+        const response = fetch('/api/product/' + rawProduct.id, {
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        }).then(async (res) => {
+          const { product } = await res.json();
+          const div = document.createElement('div');
+          div.className = 'flex items-center gap-4 pb-4 border-b';
+          div.setAttribute('data-product-id', product.id);
+
+          div.innerHTML = `
+            <img src=${product.mainImageUrl} alt="${product.name}" class="w-24 h-24 object-cover rounded-lg">
+            <div class="flex-1">
+              <h3 class="font-medium">${product.name}</h3>
+              <p class="text-gray-600">${product.condition}</p>
+              <div class="flex items-center gap-4 mt-2">
+                <select class="border rounded-lg px-2 py-1" data-product-id="${product.id}">
+                  ${Array.from({length: product.stockCount}, (_, i) => i + 1)
+                    .map(num => `<option value="${num}" ${rawProduct.quantity == num && 'selected'}>${num}</option>`)
+                    .join('')}
+                </select>
+                <div class="flex gap-2">
+                  <button class="text-gray-600 hover:text-gray-700" title="Move to Wishlist" data-wishlist-id="${product.id}">
+                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                  </button>
+                  <button class="text-red-600 hover:text-red-700" title="Remove" data-remove-id="${product.id}">
+                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <p class="font-semibold">$${product.price}</p>
+          `;
+
+          div.querySelector('select').addEventListener('change', (e) => {
+            updateQuantity(product.id, e.target.value);
+          });
+          
+          div.querySelector(`[data-wishlist-id="${product.id}"]`).addEventListener('click', () => {
+            moveToWishlist(product.id);
+          });
+          
+          div.querySelector(`[data-remove-id="${product.id}"]`).addEventListener('click', () => {
+            removeFromCart(product.id);
+          });
+
+          cartElement.appendChild(div);
+        });
+      });
+    }
+
+    const wishlistString = localStorage.getItem('wishlist');
+
+    if (wishlistString) {
+      const wishlist = JSON.parse(wishlistString);
+
+      const wishListCountElement = document.getElementById('wishListCount');
+      wishListCountElement.innerHTML = wishlist.length + " items" 
+      
+      wishlist.forEach(async (product) => {
+        const response = fetch('/api/product/' + product.id, {
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        }).then(async (res) => {
+          const { product } = await res.json();
+          const div = document.createElement('div');
+          div.className = 'flex items-center gap-4 pb-4 border-b';
+          div.setAttribute('data-wishlist-product-id', product.id);
+          
+          div.innerHTML = `
+            <img src=${product.mainImageUrl} alt="${product.name}" class="w-24 h-24 object-cover rounded-lg">
+            <div class="flex-1">
+              <h3 class="font-medium">${product.name}</h3>
+              <p class="text-gray-600">${product.condition}</p>
+              <p class="text-gray-600 mt-1">$${product.price}</p>
+            </div>
+            <div class="flex gap-2">
+              <button class="flex items-center gap-2 px-4 py-2 border border-purple-600 text-purple-600 rounded-lg hover:bg-purple-50 transition-colors" data-add-to-cart-id="${product.id}">
+                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-cart"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+                Add to Cart
+              </button>
+              <button class="text-red-600 hover:text-red-700 p-2" title="Remove" data-remove-wishlist-id="${product.id}">
+                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+              </button>
+            </div>
+          `;
+          
+          div.querySelector(`[data-add-to-cart-id="${product.id}"]`).addEventListener('click', () => {
+            addToCart(product.id);
+          });
+          
+          div.querySelector(`[data-remove-wishlist-id="${product.id}"]`).addEventListener('click', () => {
+            removeFromWishlist(product.id);
+          });
+
+          wishElement.appendChild(div);
+        });
+      });
+    }
+
+    lucide.createIcons();
+  </script>
+</body>
+
+<%- include('../partials/footer') %>
+
+</html>

@@ -17,7 +17,7 @@
         <div class="relative">
           <h2 class="text-3xl font-bold text-white mb-6 text-center">Create Account</h2>
 
-          <form class="space-y-6">
+          <form class="space-y-6" onsubmit="register(event)">
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-medium text-gray-300 mb-2">First Name</label>
@@ -25,7 +25,7 @@
                   <div class="absolute left-3 top-3 text-gray-400">
                     <i class="w-5 h-5" data-lucide="user"></i>
                   </div>
-                  <input type="text" class="w-full bg-gray-900/50 border border-white/10 rounded-lg pl-10 pr-3 py-2 text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-600 focus:border-transparent" placeholder="First name">
+                  <input required type="text" class="w-full bg-gray-900/50 border border-white/10 rounded-lg pl-10 pr-3 py-2 text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-600 focus:border-transparent" placeholder="First name">
                 </div>
               </div>
 
@@ -46,7 +46,7 @@
                 <div class="absolute left-3 top-3 text-gray-400">
                   <i class="w-5 h-5" data-lucide="mail"></i>
                 </div>
-                <input type="email" class="w-full bg-gray-900/50 border border-white/10 rounded-lg pl-10 pr-3 py-2 text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-600 focus:border-transparent" placeholder="Enter your email">
+                <input required type="email" class="w-full bg-gray-900/50 border border-white/10 rounded-lg pl-10 pr-3 py-2 text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-600 focus:border-transparent" placeholder="Enter your email">
               </div>
             </div>
 
@@ -56,7 +56,7 @@
                 <div class="absolute left-3 top-3 text-gray-400">
                   <i class="w-5 h-5" data-lucide="lock"></i>
                 </div>
-                <input type="password" class="w-full bg-gray-900/50 border border-white/10 rounded-lg pl-10 pr-3 py-2 text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-600 focus:border-transparent" placeholder="Create a password">
+                <input required type="password" class="w-full bg-gray-900/50 border border-white/10 rounded-lg pl-10 pr-3 py-2 text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-600 focus:border-transparent" placeholder="Create a password">
               </div>
             </div>
 
@@ -66,16 +66,18 @@
                 <div class="absolute left-3 top-3 text-gray-400">
                   <i class="w-5 h-5" data-lucide="lock"></i>
                 </div>
-                <input type="password" class="w-full bg-gray-900/50 border border-white/10 rounded-lg pl-10 pr-3 py-2 text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-600 focus:border-transparent" placeholder="Confirm your password">
+                <input required type="password" class="w-full bg-gray-900/50 border border-white/10 rounded-lg pl-10 pr-3 py-2 text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-600 focus:border-transparent" placeholder="Confirm your password">
               </div>
             </div>
 
+            <!--
             <div class="flex items-center">
               <input type="checkbox" class="h-4 w-4 rounded border-gray-600 text-purple-600 focus:ring-purple-600 bg-gray-900/50">
               <label class="ml-2 block text-sm text-gray-300">I agree to the <a href="#" class="text-purple-400 hover:text-purple-300">Terms of Service</a> and <a href="#" class="text-purple-400 hover:text-purple-300">Privacy Policy</a></label>
             </div>
+            -->
 
-            <button class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-lg flex items-center justify-center group transition-all duration-300">
+            <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-lg flex items-center justify-center group transition-all duration-300">
               <span>Create Account</span>
               <i class="w-5 h-5 ml-2 transition-transform duration-300 group-hover:translate-x-1" data-lucide="arrow-right"></i>
             </button>
@@ -92,6 +94,44 @@
 
   <script>
     lucide.createIcons();
+
+    async function register(event) {
+      event.preventDefault();
+
+      const firstName = document.querySelector('input[placeholder="First name"]').value;
+      const lastName = document.querySelector('input[placeholder="Last name"]').value;
+      const email = document.querySelector('input[placeholder="Enter your email"]').value;
+      const password = document.querySelector('input[placeholder="Create a password"]').value;
+      const confirmPassword = document.querySelector('input[placeholder="Confirm your password"]').value;
+
+      if (!firstName || !lastName || !email || !password || !confirmPassword) {
+        alert('Please fill in all fields');
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        alert('Passwords do not match');
+        return;
+      }
+
+      const response = await fetch('/api/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: `${firstName} ${lastName}`,
+          email,
+          password
+        })
+      });
+
+      if (response.ok) {
+        window.location.href = '/login';
+      } else {
+        alert('An error occurred');
+      }
+    }
   </script>
 </body>
 
