@@ -92,6 +92,48 @@ export const authenticators = pgTable(
     })
 )
 
+export const orders = pgTable("order", {
+    id: text("id")
+        .primaryKey()
+        .$defaultFn(() => crypto.randomUUID()),
+    userId: text("user_id")
+        .notNull()
+        .references(() => users.id, { onDelete: "cascade" }),
+    stripeSessionId: text("stripe_session_id").notNull(),
+    createdAt: timestamp("created_at", { mode: "date" })
+        .notNull()
+        .defaultNow(),
+})
+
+export const orderItems = pgTable("order_item", {
+    id: text("id")
+        .primaryKey(),
+    orderId: text("order_id")
+        .notNull()
+        .references(() => orders.id, { onDelete: "cascade" }),
+    productId: text("product_id")
+        .references(() => products.id),
+    name: text("name").notNull(),
+    description: text("description").notNull(),
+    amountSubtotal: integer("amount_subtotal").notNull(),
+    amountTax: integer("amount_tax").notNull(),
+    amountTotal: integer("amount_total").notNull(),
+    amountDiscount: integer("amount_discount").notNull(),
+    currency: text("currency").notNull(),
+    quantity: integer("quantity").notNull(),
+
+    priceId: text("price_id").notNull(),
+    unitAmount: integer("unit_amount").notNull(),
+
+    stripeProductId: text("stripe_product_id"),
+    stripeProductName: text("stripe_product_name"),
+    stripeProductImage: text("stripe_product_image"),
+
+    createdAt: timestamp("created_at", { mode: "date" })
+        .notNull()
+        .defaultNow(),
+})
+
 export const products = pgTable("product", {
     id: text("id")
         .primaryKey()

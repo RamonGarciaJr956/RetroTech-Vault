@@ -36,50 +36,82 @@
             <div class="space-y-4">
               <div class="flex justify-between">
                 <p class="text-gray-600">Subtotal</p>
-                <p class="font-semibold">$249.98</p>
+                <p class="font-semibold" id="subTotal">$0.00</p>
               </div>
               <div class="flex justify-between">
-                <p class="text-gray-600">Shipping</p>
-                <p class="font-semibold">$9.99</p>
+                <p class="text-gray-600">Estimated Shipping</p>
+                <p class="font-semibold" id="shipping">$0.00</p>
               </div>
               <div class="flex justify-between">
-                <p class="text-gray-600">Tax</p>
-                <p class="font-semibold">$25.00</p>
+                <p class="text-gray-600">Estimated Tax</p>
+                <p class="font-semibold" id="tax">$0.00</p>
               </div>
               <div class="border-t pt-4">
                 <div class="flex justify-between">
                   <p class="font-semibold">Total</p>
-                  <p class="font-semibold">$284.97</p>
+                  <p class="font-semibold" id="total">$0.00</p>
                 </div>
+              </div>
+              <div class="flex flex-col gap-2">
+                <label for="state" class="text-gray-600">State</label>
+                <select id="state" class="border rounded-lg px-2 py-1">
+                  <option value="TX" selected>Texas</option>
+                  <option value="CA">California</option>
+                  <option value="NY">New York</option>
+                  <option value="AL">Alabama</option>
+                  <option value="AK">Alaska</option>
+                  <option value="AZ">Arizona</option>
+                  <option value="AR">Arkansas</option>
+                  <option value="CO">Colorado</option>
+                  <option value="CT">Connecticut</option>
+                  <option value="DE">Delaware</option>
+                  <option value="FL">Florida</option>
+                  <option value="GA">Georgia</option>
+                  <option value="HI">Hawaii</option>
+                  <option value="ID">Idaho</option>
+                  <option value="IL">Illinois</option>
+                  <option value="IN">Indiana</option>
+                  <option value="IA">Iowa</option>
+                  <option value="KS">Kansas</option>
+                  <option value="KY">Kentucky</option>
+                  <option value="LA">Louisiana</option>
+                  <option value="ME">Maine</option>
+                  <option value="MD">Maryland</option>
+                  <option value="MA">Massachusetts</option>
+                  <option value="MI">Michigan</option>
+                  <option value="MN">Minnesota</option>
+                  <option value="MS">Mississippi</option>
+                  <option value="MO">Missouri</option>
+                  <option value="MT">Montana</option>
+                  <option value="NE">Nebraska</option>
+                  <option value="NV">Nevada</option>
+                  <option value="NH">New Hampshire</option>
+                  <option value="NJ">New Jersey</option>
+                  <option value="NM">New Mexico</option>
+                  <option value="NC">North Carolina</option>
+                  <option value="ND">North Dakota</option>
+                  <option value="OH">Ohio</option>
+                  <option value="OK">Oklahoma</option>
+                  <option value="OR">Oregon</option>
+                  <option value="PA">Pennsylvania</option>
+                  <option value="RI">Rhode Island</option>
+                  <option value="SC">South Carolina</option>
+                  <option value="SD">South Dakota</option>
+                  <option value="TN">Tennessee</option>
+                  <option value="UT">Utah</option>
+                  <option value="VT">Vermont</option>
+                  <option value="VA">Virginia</option>
+                  <option value="WA">Washington</option>
+                  <option value="WV">West Virginia</option>
+                  <option value="WI">Wisconsin</option>
+                  <option value="WY">Wyoming</option>
+                </select>
               </div>
             </div>
 
-            <form class="mt-8 space-y-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <input type="email" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-600 focus:border-transparent">
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Card Number</label>
-                <input type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-600 focus:border-transparent">
-              </div>
-
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Expiry Date</label>
-                  <input type="text" placeholder="MM/YY" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-600 focus:border-transparent">
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">CVC</label>
-                  <input type="text" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-600 focus:border-transparent">
-                </div>
-              </div>
-
-              <button class="w-full bg-purple-600 text-white rounded-lg px-4 py-2 hover:bg-purple-700 transition-colors">
-                Place Order
-              </button>
-            </form>
+            <button onclick="checkout()" id="checkout" disabled class="mt-6 w-full bg-[#6366f1] text-white rounded-lg px-4 py-2 hover:bg-[#4e50bf] transition-colors">
+              Checkout with Stripe
+            </button>
           </div>
         </div>
 
@@ -88,170 +120,466 @@
   </section>
 
   <script>
-    const updateQuantity = (productId, quantity) => {
-      const cartData = JSON.parse(localStorage.getItem('cart')) || [];
-      const productIndex = cartData.findIndex(item => item.id === productId);
-      if (productIndex !== -1) {
-        cartData[productIndex].quantity = parseInt(quantity);
-        localStorage.setItem('cart', JSON.stringify(cartData));
-      }
-    };
-
-    const removeFromCart = (productId) => {
-      const cartData = JSON.parse(localStorage.getItem('cart')) || [];
-      const updatedCart = cartData.filter(item => item.id !== productId);
-      localStorage.setItem('cart', JSON.stringify(updatedCart));
-      document.querySelector(`[data-product-id="${productId}"]`)?.remove();
-    };
-
-    const moveToWishlist = async (productId) => {
-      const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
-      wishlist.push({"id": productId});
-      localStorage.setItem('wishlist', JSON.stringify(wishlist));
-      removeFromCart(productId);
-    };
-
-    const removeFromWishlist = (productId) => {
-      const wishlistData = JSON.parse(localStorage.getItem('wishlist')) || [];
-      const updatedWishlist = wishlistData.filter(item => item.id !== productId);
-      localStorage.setItem('wishlist', JSON.stringify(updatedWishlist));
-      
-      document.querySelector(`[data-wishlist-product-id="${productId}"]`)?.remove();
-    };
-
-    const addToCart = async (productId) => {
-      const cartData = JSON.parse(localStorage.getItem('cart')) || [];
-      const wishlistData = JSON.parse(localStorage.getItem('wishlist')) || [];
-      
-      const existingProduct = cartData.find(item => item.id === productId);
-      
-      if (existingProduct) {
-        existingProduct.quantity = (existingProduct.quantity || 1) + 1;
-      } else {
-        cartData.push({
-          id: productId,
-          quantity: 1
-        });
-      }
-      
-      localStorage.setItem('cart', JSON.stringify(cartData));
-      
-      const updatedWishlist = wishlistData.filter(item => item.id !== productId);
-      localStorage.setItem('wishlist', JSON.stringify(updatedWishlist));
-      
-      document.querySelector(`[data-wishlist-product-id="${productId}"]`)?.remove();
-    };
-
     const cartElement = document.getElementById('cartList');
-    const wishElement = document.getElementById('wishList')
-    const cartString = localStorage.getItem('cart');
+    const wishElement = document.getElementById('wishList');
+    const subTotalElement = document.getElementById('subTotal');
+    const shippingElement = document.getElementById('shipping');
+    const taxElement = document.getElementById('tax');
+    const totalElement = document.getElementById('total');
+    const stateSelect = document.getElementById('state');
+    var stripe = Stripe('<%= stripePublicKey %>');
 
-    if (cartString) {
-      const cart = JSON.parse(cartString);
+    let state = {
+      products: [],
+      cartItems: [],
+      wishlistItems: [],
+      subTotal: 0.00,
+      shipping: 0.00,
+      tax: 0.00,
+      total: 0.00,
+      isLoading: true
+    };
 
-      cart.forEach(async (rawProduct) => {
-        const response = fetch('/api/product/' + rawProduct.id, {
-          method: "POST",
-          headers: {
-            'Content-Type': 'application/json',
-          }
-        }).then(async (res) => {
-          const { product } = await res.json();
-          const div = document.createElement('div');
-          div.className = 'flex items-center gap-4 pb-4 border-b';
-          div.setAttribute('data-product-id', product.id);
+    const shippingRates = {
+      AL: 5.99,
+      AK: 12.99,
+      AZ: 5.99,
+      AR: 5.99,
+      CA: 5.99,
+      CO: 5.99,
+      CT: 7.49,
+      DE: 7.49,
+      FL: 6.99,
+      GA: 5.99,
+      HI: 14.99,
+      ID: 6.99,
+      IL: 6.99,
+      IN: 6.49,
+      IA: 6.49,
+      KS: 6.49,
+      KY: 6.49,
+      LA: 5.99,
+      ME: 7.49,
+      MD: 7.49,
+      MA: 7.49,
+      MI: 6.49,
+      MN: 6.49,
+      MS: 5.99,
+      MO: 6.49,
+      MT: 6.99,
+      NE: 6.49,
+      NV: 5.99,
+      NH: 7.49,
+      NJ: 7.99,
+      NM: 5.99,
+      NY: 7.99,
+      NC: 5.99,
+      ND: 6.49,
+      OH: 6.49,
+      OK: 5.99,
+      OR: 6.99,
+      PA: 7.49,
+      RI: 7.49,
+      SC: 5.99,
+      SD: 6.49,
+      TN: 5.99,
+      TX: 4.99,
+      UT: 5.99,
+      VT: 7.49,
+      VA: 5.99,
+      WA: 6.99,
+      WV: 6.49,
+      WI: 6.49,
+      WY: 6.49
+    };
 
-          div.innerHTML = `
-            <img src=${product.mainImageUrl} alt="${product.name}" class="w-24 h-24 object-cover rounded-lg">
-            <div class="flex-1">
-              <h3 class="font-medium">${product.name}</h3>
-              <p class="text-gray-600">${product.condition}</p>
-              <div class="flex items-center gap-4 mt-2">
-                <select class="border rounded-lg px-2 py-1" data-product-id="${product.id}">
-                  ${Array.from({length: product.stockCount}, (_, i) => i + 1)
-                    .map(num => `<option value="${num}" ${rawProduct.quantity == num && 'selected'}>${num}</option>`)
-                    .join('')}
-                </select>
-                <div class="flex gap-2">
-                  <button class="text-gray-600 hover:text-gray-700" title="Move to Wishlist" data-wishlist-id="${product.id}">
-                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
-                  </button>
-                  <button class="text-red-600 hover:text-red-700" title="Remove" data-remove-id="${product.id}">
-                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
-                  </button>
-                </div>
-              </div>
-            </div>
-            <p class="font-semibold">$${product.price}</p>
-          `;
+    const taxRates = {
+      AL: 0.0400,
+      AK: 0.0000,
+      AZ: 0.0560,
+      AR: 0.0650,
+      CA: 0.0725,
+      CO: 0.0290,
+      CT: 0.0635,
+      DE: 0.0000,
+      FL: 0.0600,
+      GA: 0.0400,
+      HI: 0.0400,
+      ID: 0.0600,
+      IL: 0.0625,
+      IN: 0.0700,
+      IA: 0.0600,
+      KS: 0.0650,
+      KY: 0.0600,
+      LA: 0.0445,
+      ME: 0.0550,
+      MD: 0.0600,
+      MA: 0.0625,
+      MI: 0.0600,
+      MN: 0.0688,
+      MS: 0.0700,
+      MO: 0.0425,
+      MT: 0.0000,
+      NE: 0.0550,
+      NV: 0.0685,
+      NH: 0.0000,
+      NJ: 0.0663,
+      NM: 0.0513,
+      NY: 0.0400,
+      NC: 0.0475,
+      ND: 0.0500,
+      OH: 0.0575,
+      OK: 0.0450,
+      OR: 0.0000,
+      PA: 0.0600,
+      RI: 0.0700,
+      SC: 0.0600,
+      SD: 0.0450,
+      TN: 0.0700,
+      TX: 0.0625,
+      UT: 0.0595,
+      VT: 0.0600,
+      VA: 0.0530,
+      WA: 0.0650,
+      WV: 0.0600,
+      WI: 0.0500,
+      WY: 0.0400
+    };
 
-          div.querySelector('select').addEventListener('change', (e) => {
-            updateQuantity(product.id, e.target.value);
-          });
-          
-          div.querySelector(`[data-wishlist-id="${product.id}"]`).addEventListener('click', () => {
-            moveToWishlist(product.id);
-          });
-          
-          div.querySelector(`[data-remove-id="${product.id}"]`).addEventListener('click', () => {
-            removeFromCart(product.id);
-          });
+    stateSelect.addEventListener('change', () => {
+      updateShippingAndTax();
+      updateOrderSummary();
+    });
 
-          cartElement.appendChild(div);
-        });
-      });
+    function updateLocalStorage() {
+      localStorage.setItem('cart', JSON.stringify(state.cartItems));
+      localStorage.setItem('wishlist', JSON.stringify(state.wishlistItems));
     }
 
-    const wishlistString = localStorage.getItem('wishlist');
+    function updateShippingAndTax() {
+      const selectedState = stateSelect.value;
+      state.shipping = shippingRates[selectedState] || 0;
+      state.tax = state.subTotal * (taxRates[selectedState] || 0);
+    }
 
-    if (wishlistString) {
-      const wishlist = JSON.parse(wishlistString);
+    function calculateSubTotal() {
+      state.subTotal = state.cartItems.reduce((total, cartItem) => {
+        const product = state.products.find(p => p.product.id === cartItem.id);
+        return total + (product ? product.product.price * cartItem.quantity : 0);
+      }, 0);
+    }
 
-      const wishListCountElement = document.getElementById('wishListCount');
-      wishListCountElement.innerHTML = wishlist.length + " items" 
+    function updateOrderSummary() {
+      subTotalElement.textContent = `$${state.subTotal.toFixed(2)}`;
+      shippingElement.textContent = `$${state.shipping.toFixed(2)}`;
+      taxElement.textContent = `$${state.tax.toFixed(2)}`;
       
-      wishlist.forEach(async (product) => {
-        const response = fetch('/api/product/' + product.id, {
+      if(state.subTotal != 0){
+        state.total = state.subTotal + state.shipping + state.tax;
+      } else {
+        state.total = 0;
+      }
+
+      totalElement.textContent = `$${state.total.toFixed(2)}`;
+    }
+
+    function updateQuantity(productId, quantity) {
+      const index = state.cartItems.findIndex(item => item.id === productId);
+      state.cartItems[index].quantity = parseInt(quantity);
+
+      calculateSubTotal();
+      updateShippingAndTax();
+      updateOrderSummary();
+      updateLocalStorage();
+    }
+
+    function removeFromCart(productId) {
+      state.cartItems = state.cartItems.filter(item => item.id !== productId);
+      const productElement = cartElement.querySelector(`[data-product-id="${productId}"]`);
+      if (productElement) productElement.remove();
+
+      calculateSubTotal();
+      updateShippingAndTax();
+      updateOrderSummary();
+      updateLocalStorage();
+      updateCartCounter();
+    }
+
+    function moveToWishlist(productId) {
+      try {
+        state.cartItems = state.cartItems.filter(item => item.id !== productId);
+
+        if (!state.wishlistItems.find(item => item.id === productId)) {
+          state.wishlistItems.push({
+            id: productId
+          });
+        }
+
+        const product = state.products.find(p => p.product.id === productId);
+        if (product) {
+          appendProductToWishlist(product.product);
+        }
+
+        const cartItem = document.querySelector(`[data-product-id="${productId}"]`);
+        if (cartItem) cartItem.remove();
+
+        calculateSubTotal();
+        updateShippingAndTax();
+        updateOrderSummary();
+        updateLocalStorage();
+
+        document.getElementById('wishListCount').textContent = `${state.wishlistItems.length} items`;
+      } catch (error) {
+        console.error('Error moving product to wishlist:', error);
+      }
+    }
+
+    function addToCart(productId) {
+      try {
+        state.wishlistItems = state.wishlistItems.filter(item => item.id !== productId);
+
+        if (!state.cartItems.find(item => item.id === productId)) {
+          state.cartItems.push({
+            id: productId,
+            quantity: 1
+          });
+
+          const product = state.products.find(p => p.product.id === productId);
+          if (product) {
+            appendProductToCart(product.product, 1);
+          }
+        }
+
+        calculateSubTotal();
+        updateShippingAndTax();
+        updateOrderSummary();
+        updateLocalStorage();
+        updateCartCounter();
+
+        const wishlistItem = document.querySelector(`[data-wishlist-product-id="${productId}"]`);
+        if (wishlistItem) wishlistItem.remove();
+
+        document.getElementById('wishListCount').textContent = `${state.wishlistItems.length} items`;
+      } catch (error) {
+        console.error('Error adding product to cart:', error);
+      }
+    }
+
+    function removeFromWishlist(productId) {
+      state.wishlistItems = state.wishlistItems.filter(item => item.id !== productId);
+
+      const productElement = wishElement.querySelector(`[data-wishlist-product-id="${productId}"]`);
+      if (productElement) productElement.remove();
+
+      document.getElementById('wishListCount').textContent = `${state.wishlistItems.length} items`;
+      updateLocalStorage();
+    }
+
+    function appendProductToCart(product, quantity) {
+      const div = document.createElement('div');
+      div.className = 'flex items-center gap-4 pb-4 border-b';
+      div.setAttribute('data-product-id', product.id);
+
+      div.innerHTML = `
+        <img src=${product.mainImageUrl} alt="${product.name}" class="w-24 h-24 object-cover rounded-lg">
+        <div class="flex-1">
+          <h3 class="font-medium">${product.name}</h3>
+          <p class="text-gray-600">${product.condition}</p>
+          <div class="flex items-center gap-4 mt-2">
+            <select class="border rounded-lg px-2 py-1" data-product-id="${product.id}">
+              ${Array.from({length: product.stockCount}, (_, i) => i + 1)
+                .map(num => `<option value="${num}" ${quantity == num && 'selected'}>${num}</option>`)
+                .join('')}
+            </select>
+            <div class="flex gap-2">
+              <button class="text-gray-600 hover:text-gray-700" title="Move to Wishlist" data-wishlist-id="${product.id}">
+                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+              </button>
+              <button class="text-red-600 hover:text-red-700" title="Remove" data-remove-id="${product.id}">
+                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+        <p class="font-semibold">$${product.price}</p>
+      `;
+
+      div.querySelector('select').addEventListener('change', (e) => {
+        updateQuantity(product.id, e.target.value);
+      });
+      
+      div.querySelector(`[data-wishlist-id="${product.id}"]`).addEventListener('click', () => {
+        moveToWishlist(product.id);
+      });
+      
+      div.querySelector(`[data-remove-id="${product.id}"]`).addEventListener('click', () => {
+        removeFromCart(product.id);
+      });
+
+      cartElement.appendChild(div);
+    }
+
+    function appendProductToWishlist(product) {
+      const div = document.createElement('div');
+      div.className = 'flex items-center gap-4 pb-4 border-b';
+      div.setAttribute('data-wishlist-product-id', product.id);
+      
+      div.innerHTML = `
+        <img src=${product.mainImageUrl} alt="${product.name}" class="w-24 h-24 object-cover rounded-lg">
+        <div class="flex-1">
+          <h3 class="font-medium">${product.name}</h3>
+          <p class="text-gray-600">${product.condition}</p>
+          <p class="text-gray-600 mt-1">$${product.price}</p>
+        </div>
+        <div class="flex gap-2" id="wishlist-buttons">
+        </div>
+      `;
+
+      wishListButtons = div.querySelector('#wishlist-buttons');
+
+      if(product.stockCount > 0){
+        wishListButtons.innerHTML = `
+          <button class="flex items-center gap-2 px-4 py-2 border border-purple-600 text-purple-600 rounded-lg hover:bg-purple-50 transition-colors" data-add-to-cart-id="${product.id}">
+            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-cart"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+            Add to Cart
+          </button>
+          <button class="text-red-600 hover:text-red-700 p-2" title="Remove" data-remove-wishlist-id="${product.id}">
+            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+          </button>
+        `;
+      } else {
+        wishListButtons.innerHTML = `
+          <button class="text-red-600 hover:text-red-700 p-2" title="Remove" data-remove-wishlist-id="${product.id}">
+            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+          </button>
+        `;
+      }
+      
+      const addToCartButton = div.querySelector(`[data-add-to-cart-id="${product.id}"]`);
+
+      if(addToCartButton && product.stockCount > 0){
+        addToCartButton.addEventListener('click', () => {
+          addToCart(product.id);
+        });
+      }
+      
+      div.querySelector(`[data-remove-wishlist-id="${product.id}"]`).addEventListener('click', () => {
+        removeFromWishlist(product.id);
+      });
+
+      wishElement.appendChild(div);
+    }
+
+    async function checkout() {
+      let cart = state.products
+        .filter(p => state.cartItems.find(item => item.id === p.product.id))
+        .map(p => ({
+          ...p,
+          quantity: state.cartItems.find(item => item.id === p.product.id)?.quantity || 0
+        }))
+      
+      if(cart.length === 0){
+        alert('Please add items to your cart before checking out.');
+        return;
+      }
+        
+      try {
+        const response = await fetch('/api/checkout', {
           method: "POST",
           headers: {
             'Content-Type': 'application/json',
-          }
-        }).then(async (res) => {
-          const { product } = await res.json();
-          const div = document.createElement('div');
-          div.className = 'flex items-center gap-4 pb-4 border-b';
-          div.setAttribute('data-wishlist-product-id', product.id);
-          
-          div.innerHTML = `
-            <img src=${product.mainImageUrl} alt="${product.name}" class="w-24 h-24 object-cover rounded-lg">
-            <div class="flex-1">
-              <h3 class="font-medium">${product.name}</h3>
-              <p class="text-gray-600">${product.condition}</p>
-              <p class="text-gray-600 mt-1">$${product.price}</p>
-            </div>
-            <div class="flex gap-2">
-              <button class="flex items-center gap-2 px-4 py-2 border border-purple-600 text-purple-600 rounded-lg hover:bg-purple-50 transition-colors" data-add-to-cart-id="${product.id}">
-                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-cart"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
-                Add to Cart
-              </button>
-              <button class="text-red-600 hover:text-red-700 p-2" title="Remove" data-remove-wishlist-id="${product.id}">
-                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
-              </button>
-            </div>
-          `;
-          
-          div.querySelector(`[data-add-to-cart-id="${product.id}"]`).addEventListener('click', () => {
-            addToCart(product.id);
-          });
-          
-          div.querySelector(`[data-remove-wishlist-id="${product.id}"]`).addEventListener('click', () => {
-            removeFromWishlist(product.id);
-          });
-
-          wishElement.appendChild(div);
+          },
+          body: JSON.stringify({
+            cart: cart,
+            shipping: state.shipping,
+            tax: state.tax.toFixed(2),
+          })
         });
-      });
+
+        if (!response.ok) {
+          const { message } = await response.json();
+          alert(message);
+          return;
+        }
+
+        const data = await response.json();
+        if (data.error) {
+          alert(data.error);
+          return;
+        }
+
+        const { error } = await stripe.redirectToCheckout({
+          sessionId: data.sessionId
+        });
+
+        if (error) {
+          console.error('Error redirecting to checkout:', error);
+          alert('An error occurred. Please try again later.');
+        }
+      } catch (error) {
+        console.error('Error checking out:', error);
+        alert('An error occurred. Please try again later.');
+      }
     }
+
+    async function initializeStore() {
+      try {
+        const div = document.createElement('div');
+        div.className = 'flex flex-col items-center justify-center h-32 gap-2 loading';
+
+        div.innerHTML = '<svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-loader-circle"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> <span class="text-gray-600">Loading...</span>';
+
+        cartElement.appendChild(div);
+        wishElement.appendChild(div.cloneNode(true));
+
+        state.cartItems = JSON.parse(localStorage.getItem('cart') || '[]');
+        state.wishlistItems = JSON.parse(localStorage.getItem('wishlist') || '[]');
+
+        const productIds = new Set([
+          ...state.cartItems.map(item => item.id),
+          ...state.wishlistItems.map(item => item.id)
+        ]);
+
+        const promises = Array.from(productIds).map(async (productId) => {
+          const response = await fetch('/api/product/' + productId, {
+            method: "POST",
+            headers: {
+              'Content-Type': 'application/json',
+            }
+          });
+          return await response.json();
+        });
+
+        state.products = await Promise.all(promises);
+        
+        state.isLoading = false;
+        document.querySelectorAll('.loading').forEach(el => el.remove());
+        document.getElementById('checkout').removeAttribute('disabled');
+
+        state.cartItems.forEach(cartItem => {
+          const product = state.products.find(p => p.product.id === cartItem.id);
+          if (product) {
+            appendProductToCart(product.product, cartItem.quantity);
+          }
+        });
+
+        state.wishlistItems.forEach(wishlistItem => {
+          const product = state.products.find(p => p.product.id === wishlistItem.id);
+          if (product) {
+            appendProductToWishlist(product.product);
+          }
+        });
+
+        calculateSubTotal();
+        updateShippingAndTax();
+        updateOrderSummary();
+        document.getElementById('wishListCount').textContent = `${state.wishlistItems.length} items`;
+      } catch (error) {
+        console.error('Error initializing store:', error);
+      }
+    }
+
+    initializeStore();
 
     lucide.createIcons();
   </script>

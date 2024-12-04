@@ -77,10 +77,15 @@
           <div class="prose prose-gray mb-6">
             <p><%= product.shortDescription %></p>
           </div>
-
+          <% if(product.stockCount > 0){ %>
           <button onclick="addToCart('<%= product.id %>')" class="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 transition-colors mb-4">
             Add to Cart
           </button>
+          <% } else { %>
+          <button class="w-full bg-gray-300 text-gray-600 py-3 rounded-lg cursor-not-allowed mb-4">
+            Out of Stock
+          </button>
+          <% } %>
           <button onclick="addToWishList('<%= product.id %>')" class="w-full border border-purple-600 text-purple-600 py-3 rounded-lg hover:bg-purple-50 transition-colors">
             Add to Wishlist
           </button>
@@ -136,7 +141,7 @@
       <div class="mb-16" id="reviews">
         <div class="flex justify-between items-center mb-6">
           <h2 class="text-2xl font-bold">Customer Reviews</h2>
-          <button class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+          <button id="reviewBtn" class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors">
             Write a Review
           </button>
         </div>
@@ -193,10 +198,30 @@
     </div>
   </main>
 
+  <%- include('../partials/writeReviewModal', { productId: product.id }) %>
+
   <script>
     lucide.createIcons();
 
-    async function addToCart(productId) {
+    var modal = document.getElementById("reviewModal");
+    var btn = document.getElementById("reviewBtn");
+    var span = document.getElementsByClassName("close")[0];
+
+    btn.onclick = function() {
+      modal.style.display = "flex";
+    }
+
+    span.onclick = function() {
+      modal.style.display = "none";
+    }
+
+    window.onclick = function(event) {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    }
+
+    async function addToCart(productId) {      
       const cart = JSON.parse(localStorage.getItem('cart')) || [];
 
       if (cart.find(p => p.id === productId)) {
@@ -204,24 +229,26 @@
       }
 
       cart.push({
-        id: productId
+        id: productId,
+        quantity: 1
       });
 
       localStorage.setItem('cart', JSON.stringify(cart));
+      updateCartCounter();
     }
 
     async function addToWishList(productId) {
-      const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+      const wishList = JSON.parse(localStorage.getItem('wishlist')) || [];
 
-      if (wishlist.find(p => p.id === productId)) {
+      if (wishList.find(p => p.id === productId)) {
         return;
       }
 
-      wishlist.push({
-        id: productId
+      wishList.push({
+        id: productId,
       });
 
-      localStorage.setItem('wishlist', JSON.stringify(wishlist));
+      localStorage.setItem('wishlist', JSON.stringify(wishList));
     }
   </script>
 </body>

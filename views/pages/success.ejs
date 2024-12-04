@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<%- include('../partials/head') %>
+
+<body class="bg-gray-50">
+
+  <%- include('../partials/navbar', { user: user }) %>
+
+  <section class="relative bg-gray-900 text-white overflow-hidden min-h-screen flex items-center">
+    <div class="absolute -right-20 -top-20 w-40 h-40 bg-purple-600/20 rounded-full blur-3xl"></div>
+    <div class="absolute -left-20 bottom-20 w-40 h-40 bg-blue-600/20 rounded-full blur-3xl"></div>
+
+    <div class="container mx-auto px-6 py-24">
+      <div class="max-w-3xl mx-auto text-center">
+        <div class="mb-8 flex justify-center">
+          <div class="bg-green-500/20 p-4 rounded-full">
+            <i class="w-16 h-16 text-green-500" data-lucide="check-circle"></i>
+          </div>
+        </div>
+
+        <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-6">
+          Thank You for Your Order,
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-purple-600"><%= result[0].customer_details.name %>!</span>
+        </h1>
+
+        <p class="text-lg text-gray-300 mb-8">
+          Your order has been confirmed and will be shipped soon.
+          We've sent a confirmation email to <%= result[0].customer_details.email %>.
+        </p>
+
+        <div class="bg-white/10 backdrop-blur-md rounded-lg p-8 mb-8 text-left">
+          <h2 class="text-xl font-bold mb-4">Order Summary</h2>
+          <div class="space-y-4">
+            <% let subtotal = 0; result[1].data.forEach(function(item) { if (item.description !== "Sales Tax") { subtotal += item.amount_total; %>
+            <div class="flex justify-between items-center border-b border-gray-700 pb-4">
+              <div>
+                <h3 class="font-semibold"><%= item.description %></h3>
+                <p class="text-sm text-gray-400">Quantity: <%= item.quantity %></p>
+              </div>
+              <p class="font-semibold">$<%= (item.amount_total / 100).toFixed(2) %></p>
+            </div>
+            <% }}) %>
+
+            <div class="flex justify-between items-center text-sm text-gray-400">
+              <span>Subtotal</span>
+              <span>$<%= (subtotal / 100).toFixed(2) %></span>
+            </div>
+
+            <div class="flex justify-between items-center text-sm text-gray-400">
+              <span>Shipping</span>
+              <span>$<%= (result[0].shipping_cost.amount_total / 100).toFixed(2) %></span>
+            </div>
+
+            <div class="flex justify-between items-center text-sm text-gray-400">
+              <span>Tax</span>
+              <span>$<%= (result[1].data.find(item => item.description === "Sales Tax").amount_total / 100).toFixed(2) %></span>
+            </div>
+
+            <div class="flex justify-between items-center pt-4 border-t border-gray-700 font-bold">
+              <span>Total</span>
+              <span>$<%= (result[0].amount_total / 100).toFixed(2) %></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white/10 backdrop-blur-md rounded-lg p-8 mb-8 text-left">
+          <h2 class="text-xl font-bold mb-4">Shipping Information</h2>
+          <p class="text-gray-300">
+            <%= result[0].shipping_details.name %><br>
+            <%= result[0].shipping_details.address.line1 %><br>
+            <% if (result[0].shipping_details.address.line2) { %>
+            <%= result[0].shipping_details.address.line2 %><br>
+            <% } %>
+            <%= result[0].shipping_details.address.city %>, <%= result[0].shipping_details.address.state %> <%= result[0].shipping_details.address.postal_code %><br>
+            <%= result[0].shipping_details.address.country %>
+          </p>
+        </div>
+
+        <div class="bg-white/10 backdrop-blur-md rounded-lg p-8 mb-8 text-left">
+          <h2 class="text-xl font-bold mb-4">Payment Information</h2>
+          <div class="flex items-center gap-3 text-gray-300">
+            <i class="w-8 h-8" data-lucide="credit-card"></i>
+            <div>
+              <p class="font-semibold capitalize"><%= result[0].payment_intent.payment_method.card.brand %> card</p>
+              <p class="text-sm">ending in <%= result[0].payment_intent.payment_method.card.last4 %></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a href="/shop" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-8 rounded-lg flex items-center justify-center group transition-all duration-300">
+            <i class="w-5 h-5 mr-2" data-lucide="shopping-bag"></i>
+            <span>Continue Shopping</span>
+          </a>
+          <a href="/orders" class="bg-white/10 hover:bg-white/20 text-white font-semibold py-3 px-8 rounded-lg flex items-center justify-center group transition-all duration-300">
+            <i class="w-5 h-5 mr-2" data-lucide="package"></i>
+            <span>View Orders</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <%- include('../partials/footer') %>
+
+  <script>
+    lucide.createIcons();
+
+    localStorage.setItem('cart', JSON.stringify([]));
+    localStorage.setItem('wishlist', JSON.stringify([]));
+
+    updateCartCounter();
+  </script>
+</body>
+
+</html>

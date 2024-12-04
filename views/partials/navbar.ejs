@@ -3,8 +3,7 @@
     <div class="flex justify-between items-center h-16">
       <a href="/" class="flex items-center space-x-3 group">
         <div class="relative">
-          <div class="absolute inset-0 bg-purple-600/20 rounded-full blur group-hover:blur-xl transition-all duration-300"></div>
-          <img src="/logo.png" alt="RetroTech Vault" class="w-8 h-8 relative">
+          <img src="/images/logo.png" alt="RetroTech Vault" class="w-8 h-8 relative">
         </div>
         <span class="text-xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
           RetroTech Vault
@@ -20,7 +19,7 @@
           <span>Services</span>
           <span class="absolute inset-x-0 bottom-0 h-0.5 bg-purple-600 scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
         </a>
-        <a href="/shop/25" class="relative px-3 py-2 text-sm font-medium text-white group">
+        <a href="/shop" class="relative px-3 py-2 text-sm font-medium text-white group">
           <span>Shop</span>
           <span class="absolute inset-x-0 bottom-0 h-0.5 bg-purple-600 scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
         </a>
@@ -36,7 +35,7 @@
         <div>
           <% if (user) { %>
           <div class="flex items-center space-x-4">
-            <a href="/cart" class="text-purple-300 hover:text-white transition-colors duration-300">
+            <a href="/cart" id="cart" class="relative text-purple-300 hover:text-white transition-colors duration-300">
               <i class="w-6 h-6" data-lucide="shopping-cart"></i>
             </a>
             <div class="relative group">
@@ -48,7 +47,6 @@
               <div class="absolute right-0 top-[calc(100%+0.75rem)] w-48 bg-gray-900 rounded-lg shadow-lg border border-white/10 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-150">
                 <a href="/profile" class="block px-4 py-2 text-sm text-white hover:bg-white/10 first:rounded-t-lg">Profile</a>
                 <a href="/orders" class="block px-4 py-2 text-sm text-white hover:bg-white/10">Orders</a>
-                <a href="/settings" class="block px-4 py-2 text-sm text-white hover:bg-white/10">Settings</a>
                 <hr class="border-white/10">
                 <button onclick="logout()" class="w-full block px-4 py-2 text-sm text-red-400 hover:bg-white/10 flex items-center last:rounded-b-lg">
                   <i class="w-4 h-4 mr-2" data-lucide="log-out"></i>
@@ -103,9 +101,6 @@
         <a href="/orders" class="block px-3 py-2 text-base font-medium text-white hover:bg-white/10 rounded-lg transition-colors duration-300">
           Orders
         </a>
-        <a href="/settings" class="block px-3 py-2 text-base font-medium text-white hover:bg-white/10 rounded-lg transition-colors duration-300">
-          Settings
-        </a>
         <button onclick="logout()" class="block px-3 py-2 text-base font-medium text-red-400 hover:bg-white/10 rounded-lg transition-colors duration-300 mt-2">
           Sign Out
         </button>
@@ -119,4 +114,26 @@
         <% } %>
       </div>
     </div>
+
+    <script>
+      function updateCartCounter() {
+        const cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')) : [];
+        const cartElementNav = document.getElementById('cart');
+
+        if (!cartElementNav) {
+          return;
+        }
+
+        const existingCounter = cartElementNav.querySelector('span');
+        if (existingCounter) {
+          existingCounter.remove();
+        }
+
+        if (cart.length > 0) {
+          cartElementNav.innerHTML += `<span class="min-h-4 top-0 right-0 transform translate-x-1/2 -translate-y-1/2 absolute bg-red-500 aspect-square rounded-full text-xs flex justify-center items-center">${cart.length}</span>`;
+        }
+      }
+
+      updateCartCounter();
+    </script>
 </nav>

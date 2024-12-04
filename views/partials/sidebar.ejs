@@ -1,88 +1,137 @@
 <div class="lg:w-1/4">
-  <form class="bg-white rounded-lg shadow-lg p-6 sticky top-24">
+  <form action="/filter-products" method="GET" class="bg-white rounded-lg shadow-lg p-6 sticky top-24">
     <h2 class="text-lg font-bold mb-4">Filters</h2>
 
-    <div class="mb-6">
-      <div class="relative">
-        <input type="text" placeholder="Search products..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent">
-        <div class="absolute left-3 top-2.5 text-gray-400">
-          <i class="w-5 h-5" data-lucide="search"></i>
-        </div>
-      </div>
-    </div>
+    <input type="text" name="search" placeholder="Search products" class="w-full border-gray-300 border-2 rounded-lg px-3 py-2 mb-4 focus:ring-purple-600">
 
     <div class="mb-6">
       <h3 class="font-semibold mb-3">Console Type</h3>
       <div class="space-y-2">
+        <% 
+        const consoleTypes = products.reduce((acc, product) => {
+          if (!acc[product.consoleType]) {
+            acc[product.consoleType] = 0;
+          }
+          acc[product.consoleType]++;
+          return acc;
+        }, {});
+        
+        Object.entries(consoleTypes).forEach(([console, count]) => { 
+        %>
         <label class="flex items-center">
-          <input type="checkbox" class="rounded border-gray-300 text-purple-600 focus:ring-purple-600">
-          <span class="ml-2 text-gray-700">Nintendo (12)</span>
+          <input type="checkbox" name="consoleType" value="<%= console %>" class="rounded border-gray-300 text-purple-600 focus:ring-purple-600">
+          <span class="ml-2 text-gray-700"><%= console %> (<%= count %>)</span>
         </label>
-        <label class="flex items-center">
-          <input type="checkbox" class="rounded border-gray-300 text-purple-600 focus:ring-purple-600">
-          <span class="ml-2 text-gray-700">Sega (8)</span>
-        </label>
-        <label class="flex items-center">
-          <input type="checkbox" class="rounded border-gray-300 text-purple-600 focus:ring-purple-600">
-          <span class="ml-2 text-gray-700">PlayStation (10)</span>
-        </label>
-        <label class="flex items-center">
-          <input type="checkbox" class="rounded border-gray-300 text-purple-600 focus:ring-purple-600">
-          <span class="ml-2 text-gray-700">Atari (6)</span>
-        </label>
-      </div>
-    </div>
-
-    <div class="mb-6">
-      <h3 class="font-semibold mb-3">Price Range</h3>
-      <div class="space-y-2">
-        <label class="flex items-center">
-          <input type="radio" name="price" class="text-purple-600 focus:ring-purple-600">
-          <span class="ml-2 text-gray-700">Under $100</span>
-        </label>
-        <label class="flex items-center">
-          <input type="radio" name="price" class="text-purple-600 focus:ring-purple-600">
-          <span class="ml-2 text-gray-700">$100 - $200</span>
-        </label>
-        <label class="flex items-center">
-          <input type="radio" name="price" class="text-purple-600 focus:ring-purple-600">
-          <span class="ml-2 text-gray-700">$200 - $300</span>
-        </label>
-        <label class="flex items-center">
-          <input type="radio" name="price" class="text-purple-600 focus:ring-purple-600">
-          <span class="ml-2 text-gray-700">$300+</span>
-        </label>
+        <% }); %>
       </div>
     </div>
 
     <div class="mb-6">
       <h3 class="font-semibold mb-3">Condition</h3>
       <div class="space-y-2">
+        <% 
+        const conditions = products.reduce((acc, product) => {
+          if (!acc[product.condition]) {
+            acc[product.condition] = 0;
+          }
+          acc[product.condition]++;
+          return acc;
+        }, {});
+        
+        Object.entries(conditions).forEach(([condition, count]) => { 
+        %>
         <label class="flex items-center">
-          <input type="checkbox" class="rounded border-gray-300 text-purple-600 focus:ring-purple-600">
-          <span class="ml-2 text-gray-700">Mint (5)</span>
+          <input type="checkbox" name="condition" value="<%= condition %>" class="rounded border-gray-300 text-purple-600 focus:ring-purple-600">
+          <span class="ml-2 text-gray-700"><%= condition %> (<%= count %>)</span>
         </label>
-        <label class="flex items-center">
-          <input type="checkbox" class="rounded border-gray-300 text-purple-600 focus:ring-purple-600">
-          <span class="ml-2 text-gray-700">Excellent (15)</span>
-        </label>
-        <label class="flex items-center">
-          <input type="checkbox" class="rounded border-gray-300 text-purple-600 focus:ring-purple-600">
-          <span class="ml-2 text-gray-700">Good (8)</span>
-        </label>
+        <% }); %>
       </div>
     </div>
 
-    <button class="w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition-colors duration-300 mb-2">
+    <button type="submit" class="w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition-colors duration-300 mb-2">
       Apply Filters
     </button>
 
-    <button type="reset" class="w-full bg-purple-400 text-white py-2 rounded-lg hover:bg-purple-500 transition-colors duration-300">
+    <button type="button" onclick="clearFilters()" class="block w-full text-center bg-purple-400 text-white py-2 rounded-lg hover:bg-purple-500 transition-colors duration-300">
       Clear Filters
     </button>
   </form>
 
   <script>
-    lucide.createIcons();
+    document.querySelector('form').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const search = document.querySelector('input[name="search"]').value;
+
+      const selectedConsoleTypes = Array.from(document.querySelectorAll('input[name="consoleType"]:checked'))
+        .map(input => input.value);
+
+      const selectedPriceRange = document.querySelector('input[name="priceRange"]:checked')?.value || '';
+
+      const selectedConditions = Array.from(document.querySelectorAll('input[name="condition"]:checked'))
+        .map(input => input.value);
+
+      if (!selectedConsoleTypes.length && !selectedPriceRange && !selectedConditions.length && !search) {
+        alert('Please select at least one filter');
+        return;
+      }
+
+      const params = new URLSearchParams();
+
+      if (selectedConsoleTypes.length) {
+        selectedConsoleTypes.forEach(type => params.append('consoleType', type));
+      }
+
+      if (selectedConditions.length) {
+        selectedConditions.forEach(condition => params.append('condition', condition));
+      }
+
+      if (search) {
+        params.append('query', search);
+      }
+
+      const baseUrl = window.location.href.split('?')[0];
+      window.location.href = `${baseUrl}?${params.toString()}`;
+    });
+
+    const consoleTypes = document.querySelectorAll('input[name="consoleType"]');
+    const conditions = document.querySelectorAll('input[name="condition"]');
+    const search = document.querySelector('input[name="search"]');
+
+    let params = new URL(document.location.toString()).searchParams;
+    let consoleType = params.get("consoleType");
+    let condition = params.get("condition");
+    let query = params.get("query");
+
+    if (consoleType) {
+      consoleType = consoleType.split(',');
+      consoleType.forEach(type => {
+        const input = document.querySelector(`input[name="consoleType"][value="${type}"]`);
+        if (input) {
+          input.checked = true;
+        }
+      });
+    }
+
+    if (condition) {
+      condition = condition.split(',');
+      condition.forEach(cond => {
+        const input = document.querySelector(`input[name="condition"][value="${cond}"]`);
+        if (input) {
+          input.checked = true;
+        }
+      });
+    }
+
+    if (query) {
+      search.value = query;
+    }
+
+    function clearFilters() {
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(checkbox => checkbox.checked = false);
+
+      window.location.href = window.location.href.split('?')[0];
+    }
   </script>
 </div>

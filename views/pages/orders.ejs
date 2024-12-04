@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<%- include('../partials/head') %>
+
+<body class="bg-gray-50">
+  <%- include('../partials/navbar', { user: user }) %>
+
+  <div class="container mx-auto px-4 py-32 min-h-screen">
+    <div class="max-w-4xl mx-auto">
+      <div class="flex items-center justify-between mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Your Orders</h1>
+        <a href="/shop" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg flex items-center group transition-all duration-300">
+          <span>Continue Shopping</span>
+          <i class="w-5 h-5 ml-2 transition-transform duration-300 group-hover:translate-x-1" data-lucide="chevron-right"></i>
+        </a>
+      </div>
+
+      <% if (orders && orders.length > 0) { %>
+      <div class="space-y-6">
+        <% orders.forEach(function(order) { %>
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+          <div class="p-6 border-b border-gray-200">
+            <div class="flex justify-between items-start mb-4">
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900">Order #<%= order.id %></h3>
+                <p class="text-sm text-gray-500">
+                  Placed on <%= new Date(order.createdAt).toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      }) %>
+                </p>
+              </div>
+              <p class="text-lg font-bold text-purple-600">
+                <%= new Intl.NumberFormat('en-US', { 
+                      style: 'currency', 
+                      currency: order.items[0].currency 
+                    }).format(order.total / 100) %>
+              </p>
+            </div>
+
+            <div class="space-y-4">
+              <% order.items.forEach(function(item) { %>
+              <div class="flex items-center gap-4">
+                <div class="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                  <img src="<%= item.image %>" alt="<%= item.name %>" class="w-full h-full object-cover">
+                </div>
+                <div class="flex-grow">
+                  <h4 class="font-semibold text-gray-900"><%= item.name %></h4>
+                  <div class="flex items-center gap-4 mt-1">
+                    <p class="text-sm text-gray-600">Quantity: <%= item.quantity %></p>
+                  </div>
+                </div>
+              </div>
+              <% }); %>
+            </div>
+          </div>
+
+          <div class="bg-gray-50 px-6 py-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <i class="w-5 h-5 text-green-500" data-lucide="check-circle"></i>
+                <span class="text-sm font-medium text-gray-900">Order Confirmed</span>
+              </div>
+              <a href="/order/<%= order.id %>" class="text-purple-600 hover:text-purple-700 text-sm font-semibold flex items-center gap-1">
+                View Details
+                <i class="w-4 h-4" data-lucide="chevron-right"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+        <% }); %>
+      </div>
+      <% } else { %>
+      <div class="text-center py-12">
+        <div class="mb-4 flex justify-center">
+          <i class="w-16 h-16 text-gray-400" data-lucide="shopping-bag"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">No orders yet</h3>
+        <p class="text-gray-600 mb-6">Start shopping to see your orders here</p>
+        <a href="/shop" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-8 rounded-lg inline-flex items-center group transition-all duration-300">
+          <span>Browse Products</span>
+          <i class="w-5 h-5 ml-2 transition-transform duration-300 group-hover:translate-x-1" data-lucide="chevron-right"></i>
+        </a>
+      </div>
+      <% } %>
+    </div>
+  </div>
+
+  <%- include('../partials/footer') %>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+
+</html>

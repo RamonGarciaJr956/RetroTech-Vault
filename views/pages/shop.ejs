@@ -11,24 +11,24 @@
     <div class="container mx-auto px-6">
       <div class="flex flex-col lg:flex-row gap-8">
 
-        <%- include('../partials/sidebar') %>
+        <%- include('../partials/sidebar', { products: products }) %>
 
         <div class="lg:w-3/4">
-          
+
           <div class="flex justify-between items-center mb-6">
             <p class="text-gray-600">Showing <%= products.length %> products</p>
-            <select class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-600 focus:border-transparent">
-              <option>Most Popular</option>
-              <option>Price: Low to High</option>
-              <option>Price: High to Low</option>
-              <option>Newest First</option>
+            <select onchange="sortBy()" class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-600 focus:border-transparent">
+              <option value="best-selling">Best Selling</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+              <option value="newest">Newest First</option>
             </select>
           </div>
 
           <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
             <% products.forEach(function(product) { %>
-                <%- include('../partials/product_card', { product: product }) %>
+            <%- include('../partials/product_card', { product: product }) %>
             <% }) %>
 
           </div>
@@ -39,6 +39,40 @@
 
   <script>
     lucide.createIcons();
+
+    var sortOption = window.location.search.split('sort=')[1];
+    var select = document.querySelector('select');
+    if (sortOption)
+      select.value = sortOption;
+    else
+      select.value = 'best-selling';
+
+    function sortBy() {
+      var select = document.querySelector('select');
+      var option = select.options[select.selectedIndex].text;
+
+      const currentParams = new URLSearchParams(window.location.search);
+
+      switch (option) {
+        case 'Best Selling':
+          currentParams.set('sort', 'best-selling');
+          break;
+        case 'Price: Low to High':
+          currentParams.set('sort', 'price-asc');
+          break;
+        case 'Price: High to Low':
+          currentParams.set('sort', 'price-desc');
+          break;
+        case 'Newest First':
+          currentParams.set('sort', 'newest');
+          break;
+      }
+
+      const baseUrl = window.location.pathname;
+      const newUrl = `${baseUrl}?${currentParams.toString()}`;
+
+      window.location.href = newUrl;
+    }
   </script>
 </body>
 

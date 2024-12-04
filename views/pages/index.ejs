@@ -32,13 +32,6 @@
               <span>Explore Collection</span>
               <i class="w-5 h-5 ml-2 transition-transform duration-300 group-hover:translate-x-1" data-lucide="chevron-right"></i>
             </a>
-
-            <!--
-            <button class="border border-purple-400/30 hover:border-purple-400 text-white font-semibold py-3 px-8 rounded-lg flex items-center justify-center group transition-all duration-300">
-              <i class="w-5 h-5 mr-2" data-lucide="play"></i>
-              <span>Watch Process</span>
-            </button>
-            -->
           </div>
 
           <div class="md:grid hidden mt-12 grid-cols-2 sm:grid-cols-3 gap-8">
@@ -63,7 +56,7 @@
 
           <div class="relative">
             <div class="absolute inset-0 bg-gradient-to-tr from-purple-600/20 to-transparent rounded-2xl"></div>
-            <img src="hero.jpg" alt="Vintage gaming consoles" class="relative rounded-2xl shadow-2xl w-full aspect-square object-cover hover:scale-[1.02] transition-transform duration-300" />
+            <img src="/images/hero.jpg" alt="Repair" class="relative rounded-2xl shadow-2xl w-full aspect-square object-cover hover:scale-[1.02] transition-transform duration-300" />
 
             <div class="absolute -bottom-6 -left-6 bg-white/10 backdrop-blur-md rounded-lg p-4 shadow-lg border border-white/20">
               <div class="flex items-center gap-3">
@@ -183,14 +176,14 @@
       <div class="max-w-2xl mx-auto text-center">
         <h2 class="text-3xl font-bold mb-8">Ready to Restore Your Classic Console?</h2>
         <p class="mb-8">Contact us today for a free consultation and quote.</p>
-        <form class="max-w-md mx-auto">
-          <div class="relative mb-4">
+        <form class="max-w-md mx-auto space-y-4" id="quote-email">
+          <div class="relative">
             <input type="email" placeholder="Your email" class="w-full pl-10 pr-3 py-3 rounded text-gray-900">
             <div class="absolute left-3 top-3 text-gray-400">
               <i class="w-5 h-5" data-lucide="mail"></i>
             </div>
           </div>
-          <button class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded flex items-center justify-center">
+          <button onclick="return quoteEmail(event)" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded flex items-center justify-center">
             <span>Get Started</span>
             <i class="w-5 h-5 ml-2" data-lucide="send"></i>
           </button>
@@ -201,6 +194,46 @@
 
   <script>
     lucide.createIcons();
+
+    function quoteEmail(event) {
+      event.preventDefault();
+      const email = document.querySelector('#quote-email input').value;
+      
+      fetch('/api/quote-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email })
+      }).then((res) => {
+        if (res.ok) {
+          alert_message('Success', 'Your quote request has been received. We will be in touch shortly.', 'green');
+        } else {
+          alert_message('Error', 'There was an error processing your request. Please try again.', 'red');
+        }
+      });
+    }
+
+    function alert_message(title, message, color) {
+      const alert = document.querySelector('[role="alert"]');
+      if (alert) {
+        alert.remove();
+      }
+      
+      const form = document.querySelector('#quote-email');
+
+      const message_template = `
+        <div role="alert" class="rounded border-s-4 border-${color}-500 bg-${color}-50 p-4">
+          <strong class="block font-medium text-${color}-800">${title}</strong>
+
+          <p class="mt-2 text-${color}-700 text-sm">
+            ${message}
+          </p>
+        </div>
+      `;
+
+      form.insertAdjacentHTML('afterbegin', message_template);
+    }
   </script>
 </body>
 

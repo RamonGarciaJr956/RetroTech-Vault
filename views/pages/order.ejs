@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<%- include('../partials/head') %>
+
+<body class="bg-gray-50">
+  <%- include('../partials/navbar', { user: user }) %>
+
+  <div class="container mx-auto px-4 py-32">
+    <div class="max-w-4xl mx-auto">
+      <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+        <div class="flex justify-between items-center mb-6">
+          <h1 class="text-2xl font-bold">Order Details</h1>
+          <span class="px-4 py-2 rounded-full text-sm font-semibold bg-green-100 text-green-800">
+            <%= stripeResult[0].payment_status === 'paid' ? 'Paid' : 'Pending' %>
+          </span>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-8 mb-8">
+          <div>
+            <h3 class="text-gray-600 font-semibold mb-3">Shipping Address</h3>
+            <div class="text-gray-800">
+              <p class="font-medium"><%= stripeResult[0].customer_details.name %></p>
+              <p><%= stripeResult[0].shipping_details.address.line1 %></p>
+              <% if (stripeResult[0].shipping_details.address.line2) { %>
+              <p><%= stripeResult[0].shipping_details.address.line2 %></p>
+              <% } %>
+              <p>
+                <%= stripeResult[0].shipping_details.address.city %>,
+                <%= stripeResult[0].shipping_details.address.state %>
+                <%= stripeResult[0].shipping_details.address.postal_code %>
+              </p>
+              <p><%= stripeResult[0].shipping_details.address.country %></p>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="text-gray-600 font-semibold mb-3">Order Information</h3>
+            <div class="space-y-2">
+              <p>
+                <span class="text-gray-600">Email:</span>
+                <span class="text-gray-800 ml-2"><%= stripeResult[0].customer_details.email %></span>
+              </p>
+              <p>
+                <span class="text-gray-600">Order Date:</span>
+                <span class="text-gray-800 ml-2">
+                  <%= new Date(stripeResult[0].created * 1000).toLocaleDateString() %>
+                </span>
+              </p>
+              <p>
+                <span class="text-gray-600">Order ID:</span>
+                <span class="text-gray-800 ml-2"><%= orderItemsResult[0].orderId %></span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="border-t border-gray-200 pt-6">
+          <h3 class="text-lg font-semibold mb-4">Order Items</h3>
+          <div class="space-y-4">
+            <% orderItemsResult.filter(item => item.productId !== null).forEach(function(item) { %>
+            <div class="flex items-center py-4 border-b border-gray-100 last:border-0">
+              <% if (item.stripeProductImage) { %>
+              <img src="<%= item.stripeProductImage %>" alt="<%= item.name %>" class="w-16 h-16 object-cover rounded">
+              <% } else { %>
+              <div class="w-16 h-16 bg-gray-100 rounded flex items-center justify-center">
+                <i class="w-8 h-8 text-gray-400" data-lucide="package"></i>
+              </div>
+              <% } %>
+              <div class="ml-6 flex-1">
+                <h4 class="font-medium"><%= item.name %></h4>
+                <p class="text-sm text-gray-600"><%= item.description %></p>
+              </div>
+              <div class="text-right">
+                <p class="font-medium">
+                  <%= (item.amountTotal / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) %>
+                </p>
+                <p class="text-sm text-gray-600">Qty: <%= item.quantity %></p>
+              </div>
+            </div>
+            <% }) %>
+          </div>
+        </div>
+
+        <div class="border-t border-gray-200 pt-6 mt-6">
+          <div class="space-y-2">
+            <div class="flex justify-between text-gray-600">
+              <span>Tax</span>
+              <span>
+                <%= (orderItemsResult.find(item => item.productId === null).amountSubtotal / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) %>
+              </span>
+            </div>
+            <div class="flex justify-between text-gray-600">
+              <span>Subtotal</span>
+              <span>
+                <%= ((stripeResult[0].amount_subtotal - orderItemsResult.find(item => item.productId === null).amountSubtotal) / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) %>
+              </span>
+            </div>
+            <div class="flex justify-between text-gray-600">
+              <span>Shipping</span>
+              <span>
+                <%= (stripeResult[0].total_details.amount_shipping / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) %>
+              </span>
+            </div>
+            <div class="flex justify-between font-semibold text-lg pt-4 border-t border-gray-200">
+              <span>Total</span>
+              <span>
+                <%= (stripeResult[0].amount_total / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) %>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="border-t border-gray-200 pt-6 mt-6">
+          <h3 class="text-lg font-semibold mb-4">Payment Information</h3>
+          <div class="flex items-center">
+            <div class="mr-4">
+              <% if (stripeResult[0].payment_intent.payment_method.card.brand === 'visa') { %>
+              <i class="w-8 h-8 text-blue-600" data-lucide="credit-card"></i>
+              <% } else { %>
+              <i class="w-8 h-8 text-gray-400" data-lucide="credit-card"></i>
+              <% } %>
+            </div>
+            <div>
+              <p class="font-medium">
+                <%= stripeResult[0].payment_intent.payment_method.card.brand.toUpperCase() %> ending in
+                <%= stripeResult[0].payment_intent.payment_method.card.last4 %>
+              </p>
+              <p class="text-sm text-gray-600">
+                Expires <%= stripeResult[0].payment_intent.payment_method.card.exp_month %>/<%= stripeResult[0].payment_intent.payment_method.card.exp_year %>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-center">
+        <a href="/orders" class="inline-flex items-center text-purple-600 hover:text-purple-700">
+          <i class="w-5 h-5 mr-2" data-lucide="arrow-left"></i>
+          Back to Orders
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <%- include('../partials/footer') %>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+
+</html>
