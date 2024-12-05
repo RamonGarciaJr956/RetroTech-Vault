@@ -25,7 +25,7 @@ const app = express();
 const port = 8080;
 
 app.use(cors({
-  origin: 'http://localhost:8080',
+  origin: process.env.DOMAIN,
   methods: '*',
   credentials: true,
 }));
@@ -1097,8 +1097,8 @@ app.post('/api/checkout', authenticatedUser, async (req, res) => {
       ],
       customer_email: session?.user?.email,
       billing_address_collection: 'required',
-      success_url: 'http://localhost:8080/success?session_id={CHECKOUT_SESSION_ID}',
-      cancel_url: 'http://localhost:8080/cart'
+      success_url: `${process.env.DOMAIN}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.DOMAIN}/cart`
     });
 
     res.status(200).json({ sessionId: stripeSession.id });
@@ -1127,5 +1127,5 @@ app.get('*', (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server is listening on port http://localhost:${port}`);
+  console.log(`Server is listening on port ${process.env.DOMAIN}`);
 });

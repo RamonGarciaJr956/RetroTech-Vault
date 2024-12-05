@@ -106,7 +106,7 @@
         const callbackInput = document.createElement('input');
         callbackInput.type = 'hidden';
         callbackInput.name = 'callbackUrl';
-        callbackInput.value = 'http://localhost:8080';
+        callbackInput.value = process.env.DOMAIN;
         form.appendChild(callbackInput);
 
         document.body.appendChild(form);
