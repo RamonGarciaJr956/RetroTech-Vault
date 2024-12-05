@@ -11,13 +11,14 @@
       <div class="bg-white rounded-lg shadow-lg overflow-hidden">
         <div class="bg-gray-900 text-white px-6 py-8">
           <div class="flex items-center gap-6">
-            <div class="w-24 h-24 rounded-full bg-gray-700 flex items-center justify-center">
-              <% if (user.profileImage) { %>
-              <img src="<%= user.profileImage %>" alt="<%= user.name %>" class="w-full h-full object-cover rounded-full">
+            <label class="label hover:cursor-pointer w-24 h-24 rounded-full bg-gray-700 flex items-center justify-center" data-toggle="tooltip" title="Avatar">
+              <% if (user.image) { %>
+              <img id="avatar" src="<%= user.image %>" alt="<%= user.name %>" class="w-full h-full object-cover rounded-full">
               <% } else { %>
               <i class="w-12 h-12 text-gray-400" data-lucide="user"></i>
               <% } %>
-            </div>
+              <input type="file" class="sr-only" id="input" name="image" accept="image/*">
+            </label>
             <div>
               <h1 class="text-2xl font-bold"><%= user.name %></h1>
               <p class="text-gray-400"><%= user.email %></p>
@@ -76,11 +77,64 @@
         </form>
       </div>
     </div>
+
+    <div id="modal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+      <div class="flex min-h-screen items-center justify-center px-4 pt-4 pb-20 text-center">
+        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+          <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+        </div>
+
+        <div class="inline-block transform overflow-hidden rounded-lg bg-white text-left align-bottom shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:align-middle">
+          <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <div class="sm:flex sm:items-start">
+              <div class="mt-3 text-center sm:mt-0 sm:text-left w-full">
+                <h3 class="text-lg font-medium leading-6 text-gray-900" id="modalLabel">
+                  Crop the image
+                </h3>
+                <div class="mt-2">
+                  <div class="img-container">
+                    <img id="modal-image" src="https://avatars0.githubusercontent.com/u/3456749" class="w-full h-auto object-cover">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+            <button type="button" id="crop" class="inline-flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm">
+              Crop
+            </button>
+            <button onclick="return hideModal()" type="button" id="close-modal" class="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <%- include('../partials/footer') %>
 
+  <style>
+    .cropper-view-box,
+    .cropper-face {
+      border-radius: 50%;
+    }
+
+    .cropper-view-box {
+      outline: 0;
+      box-shadow: 0 0 0 1px #39f;
+    }
+  </style>
+
   <script>
+    const imageInput = document.getElementById('input');
+    const Avatar = document.getElementById('avatar');
+    const modalImage = document.getElementById('modal-image');
+    const modalContainer = document.querySelector('#modal');
+    const cropperButton = document.getElementById('crop');
+
     function updateAccountInfo() {
       const name = document.getElementById('account-name').value;
       const email = document.getElementById('account-email').value;
@@ -103,6 +157,80 @@
           }
         })
     }
+
+    imageInput.addEventListener('change', function(e) {
+      var files = e.target.files;
+      var done = function(url) {
+        imageInput.value = '';
+        modalImage.src = url;
+        showModal();
+      };
+      var reader;
+      var file;
+      var url;
+
+      if (files && files.length > 0) {
+        file = files[0];
+
+        done(URL.createObjectURL(file));
+      }
+    });
+
+    function showModal() {
+      modal.classList.remove('hidden');
+
+      cropper = new Cropper(modalImage, {
+        aspectRatio: 1,
+        viewMode: 1,
+        cropBoxMovable: false,
+        cropBoxResizable: false,
+        dragMode: "move",
+        ready: function() {
+          croppable = true;
+        },
+      });
+    }
+
+    function hideModal() {
+      modal.classList.add('hidden');
+
+      if (cropper) {
+        cropper.destroy();
+        cropper = null;
+      }
+    }
+
+    cropperButton.addEventListener('click', function() {
+      const canvas = cropper.getCroppedCanvas({
+        width: 160,
+        height: 160,
+      });
+
+      canvas.toBlob((blob) => {
+        const reader = new FileReader();
+        reader.onloadend = function() {
+          const base64data = reader.result.split(',')[1];
+
+          fetch('/api/upload-avatar', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                image: base64data
+              })
+            })
+            .then(res => {
+              if (res.ok) {
+                location.reload();
+              } else {
+                alert('Failed to upload avatar');
+              }
+            });
+        };
+        reader.readAsDataURL(blob);
+      });
+    });
 
     lucide.createIcons();
   </script>

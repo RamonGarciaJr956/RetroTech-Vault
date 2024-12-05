@@ -1,26 +1,19 @@
 <div class="lg:w-1/4">
-  <form action="/filter-products" method="GET" class="bg-white rounded-lg shadow-lg p-6 sticky top-24">
+  <div class="bg-white rounded-lg shadow-lg p-6 sticky top-24">
     <h2 class="text-lg font-bold mb-4">Filters</h2>
 
-    <input type="text" name="search" placeholder="Search products" class="w-full border-gray-300 border-2 rounded-lg px-3 py-2 mb-4 focus:ring-purple-600">
+    <input oninput="return sidebarSearch(event)" type="text" name="search" placeholder="Search products" class="w-full border-gray-300 border-2 rounded-lg px-3 py-2 mb-4 focus:ring-purple-600">
 
     <div class="mb-6">
       <h3 class="font-semibold mb-3">Console Type</h3>
-      <div class="space-y-2">
+      <div id="console-type-list" class="space-y-2">
         <% 
-        const consoleTypes = products.reduce((acc, product) => {
-          if (!acc[product.consoleType]) {
-            acc[product.consoleType] = 0;
-          }
-          acc[product.consoleType]++;
-          return acc;
-        }, {});
-        
-        Object.entries(consoleTypes).forEach(([console, count]) => { 
+          const consoleTypes = [...new Set(products.map(product => product.consoleType))];
+          consoleTypes.forEach((console) => { 
         %>
         <label class="flex items-center">
           <input type="checkbox" name="consoleType" value="<%= console %>" class="rounded border-gray-300 text-purple-600 focus:ring-purple-600">
-          <span class="ml-2 text-gray-700"><%= console %> (<%= count %>)</span>
+          <span class="ml-2 text-gray-700"><%= console %></span>
         </label>
         <% }); %>
       </div>
@@ -28,110 +21,115 @@
 
     <div class="mb-6">
       <h3 class="font-semibold mb-3">Condition</h3>
-      <div class="space-y-2">
+      <div id="condition-list" class="space-y-2">
         <% 
-        const conditions = products.reduce((acc, product) => {
-          if (!acc[product.condition]) {
-            acc[product.condition] = 0;
-          }
-          acc[product.condition]++;
-          return acc;
-        }, {});
-        
-        Object.entries(conditions).forEach(([condition, count]) => { 
+        const conditions = [...new Set(products.map(product => product.condition))];
+        conditions.forEach((condition) => { 
         %>
         <label class="flex items-center">
           <input type="checkbox" name="condition" value="<%= condition %>" class="rounded border-gray-300 text-purple-600 focus:ring-purple-600">
-          <span class="ml-2 text-gray-700"><%= condition %> (<%= count %>)</span>
+          <span class="ml-2 text-gray-700"><%= condition %></span>
         </label>
         <% }); %>
       </div>
     </div>
 
-    <button type="submit" class="w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition-colors duration-300 mb-2">
-      Apply Filters
-    </button>
-
-    <button type="button" onclick="clearFilters()" class="block w-full text-center bg-purple-400 text-white py-2 rounded-lg hover:bg-purple-500 transition-colors duration-300">
+    <button type="button" onclick="return clearFilters()" class="block w-full text-center bg-purple-400 text-white py-2 rounded-lg hover:bg-purple-500 transition-colors duration-300">
       Clear Filters
     </button>
-  </form>
+  </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/ejs@3.1.10/ejs.min.js"></script>
   <script>
-    document.querySelector('form').addEventListener('submit', function(e) {
-      e.preventDefault();
+    function sortProducts(products, sort) {
+      return products.sort((a, b) => {
+        switch (sort) {
+          case 'price-asc':
+            return a.price - b.price;
+          case 'price-desc':
+            return b.price - a.price;
+          case 'newest':
+            return new Date(b.createdAt) - new Date(a.createdAt);
+          case 'best-selling':
+            return b.isBestSeller - a.isBestSeller;
+          default:
+            return b.isBestSeller - a.isBestSeller;
+        }
+      });
+    }
 
+    const consoleTypeList = document.querySelector('#console-type-list');
+    const conditionList = document.querySelector('#condition-list');
+    let currentSearchController = null;
+
+    async function sidebarSearch() {
       const search = document.querySelector('input[name="search"]').value;
+      const productsList = document.querySelector('#products-list');
+      const numOfProducts = document.querySelector('#num-of-products');
+      const sortSelect = document.querySelector('#sort-select');
+      const consoleTypeCheckboxes = document.querySelectorAll('input[name="consoleType"]:checked');
+      const conditionCheckboxes = document.querySelectorAll('input[name="condition"]:checked');
 
-      const selectedConsoleTypes = Array.from(document.querySelectorAll('input[name="consoleType"]:checked'))
-        .map(input => input.value);
-
-      const selectedPriceRange = document.querySelector('input[name="priceRange"]:checked')?.value || '';
-
-      const selectedConditions = Array.from(document.querySelectorAll('input[name="condition"]:checked'))
-        .map(input => input.value);
-
-      if (!selectedConsoleTypes.length && !selectedPriceRange && !selectedConditions.length && !search) {
-        alert('Please select at least one filter');
-        return;
+      if (currentSearchController) {
+        currentSearchController.abort();
       }
 
-      const params = new URLSearchParams();
+      currentSearchController = new AbortController();
+      const signal = currentSearchController.signal;
 
-      if (selectedConsoleTypes.length) {
-        selectedConsoleTypes.forEach(type => params.append('consoleType', type));
-      }
+      try {
+        const response = await fetch('/api/search?query=' + search, {
+          signal
+        });
+        const data = await response.json();
 
-      if (selectedConditions.length) {
-        selectedConditions.forEach(condition => params.append('condition', condition));
-      }
+        let sortedProducts = sortProducts(data.products, sortSelect.value);
 
-      if (search) {
-        params.append('query', search);
-      }
-
-      const baseUrl = window.location.href.split('?')[0];
-      window.location.href = `${baseUrl}?${params.toString()}`;
-    });
-
-    const consoleTypes = document.querySelectorAll('input[name="consoleType"]');
-    const conditions = document.querySelectorAll('input[name="condition"]');
-    const search = document.querySelector('input[name="search"]');
-
-    let params = new URL(document.location.toString()).searchParams;
-    let consoleType = params.get("consoleType");
-    let condition = params.get("condition");
-    let query = params.get("query");
-
-    if (consoleType) {
-      consoleType = consoleType.split(',');
-      consoleType.forEach(type => {
-        const input = document.querySelector(`input[name="consoleType"][value="${type}"]`);
-        if (input) {
-          input.checked = true;
+        if (consoleTypeCheckboxes.length) {
+          const consoleTypes = Array.from(consoleTypeCheckboxes).map(checkbox => checkbox.value);
+          sortedProducts = sortedProducts.filter(product => consoleTypes.includes(product.consoleType));
         }
-      });
-    }
 
-    if (condition) {
-      condition = condition.split(',');
-      condition.forEach(cond => {
-        const input = document.querySelector(`input[name="condition"][value="${cond}"]`);
-        if (input) {
-          input.checked = true;
+        if (conditionCheckboxes.length) {
+          console.log(sortedProducts)
+          const conditions = Array.from(conditionCheckboxes).map(checkbox => checkbox.value);
+          sortedProducts = sortedProducts.filter(product => conditions.includes(product.condition));
         }
-      });
-    }
 
-    if (query) {
-      search.value = query;
+        productsList.innerHTML = '';
+        numOfProducts.innerHTML = `Showing ${sortedProducts.length} products`;
+
+        const template = await fetch("/product-card-template", {
+          signal
+        }).then(res => res.text());
+
+        sortedProducts.forEach(product => {
+          productsList.innerHTML += ejs.render(template, {
+            product,
+            user: window.user ? JSON.parse(window.user) : null
+          });
+        });
+      } catch (error) {
+        if (error.name === 'AbortError') {
+          console.log('Search aborted');
+        } else {
+          console.error('Search failed:', error);
+        }
+      } finally {
+        currentSearchController = null;
+      }
     }
 
     function clearFilters() {
       const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-      checkboxes.forEach(checkbox => checkbox.checked = false);
+      checkboxes.forEach(checkbox => {
+        checkbox.checked = false;
+      });
 
-      window.location.href = window.location.href.split('?')[0];
+      sidebarSearch();
     }
+
+    consoleTypeList.addEventListener('change', sidebarSearch);
+    conditionList.addEventListener('change', sidebarSearch);
   </script>
 </div>

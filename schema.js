@@ -5,7 +5,8 @@ import {
     text,
     primaryKey,
     integer,
-    decimal
+    decimal,
+    uniqueIndex
 } from "drizzle-orm/pg-core"
 import postgres from "postgres"
 import { drizzle } from "drizzle-orm/postgres-js"
@@ -202,3 +203,40 @@ export const productReviews = pgTable("product_review", {
         .notNull()
         .defaultNow(),
 })
+
+export const cartItems = pgTable("cart_item", {
+    id: text("id")
+        .primaryKey()
+        .$defaultFn(() => crypto.randomUUID()),
+    userId: text("user_id")
+        .notNull()
+        .references(() => users.id, { onDelete: "cascade" }),
+    productId: text("product_id")
+        .notNull()
+        .references(() => products.id, { onDelete: "cascade" }),
+    quantity: integer("quantity").notNull().default(1),
+    createdAt: timestamp("created_at", { mode: "date" })
+        .notNull()
+        .defaultNow(),
+}, (table) => ({
+    uniqueUserProduct: uniqueIndex('unique_user_product')
+        .on(table.userId, table.productId)
+}))
+
+export const wishlistItems = pgTable("wishlist_item", {
+    id: text("id")
+        .primaryKey()
+        .$defaultFn(() => crypto.randomUUID()),
+    userId: text("user_id")
+        .notNull()
+        .references(() => users.id, { onDelete: "cascade" }),
+    productId: text("product_id")
+        .notNull()
+        .references(() => products.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { mode: "date" })
+        .notNull()
+        .defaultNow(),
+}, (table) => ({
+    uniqueUserProduct: uniqueIndex('unique_user_wishlist_product')
+        .on(table.userId, table.productId)
+}))

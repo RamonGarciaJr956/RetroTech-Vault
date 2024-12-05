@@ -21,10 +21,10 @@
 
         <div class="lg:w-1/2">
           <div class="bg-white rounded-lg p-6 shadow-sm">
-            <img src="<%= product.mainImageUrl %>" alt="Product Image" class="rounded-lg object-cover w-full" />
+            <img src="<%= product.mainImageUrl %>" alt="Product Image" class="rounded-lg object-cover w-full border border-gray-200 p-2" />
             <div class="grid grid-cols-4 gap-4 mt-4">
               <% product.images.forEach(function(image) { %>
-              <img src="<%= image.imageUrl %>" alt="Thumbnail" class="rounded-lg cursor-pointer hover:opacity-75" />
+              <img src="<%= image.imageUrl %>" alt="Thumbnail" class="border border-gray-200 rounded-lg cursor-pointer hover:opacity-75 p-2" />
               <% }) %>
             </div>
           </div>
@@ -165,6 +165,7 @@
             </div>
             <p class="text-gray-600 mb-4"><%= review.content %></p>
             <div class="flex items-center gap-2">
+              <img id="avatar" src="<%= user.image %>" alt="<%= user.userName %>" class="w-6 h-6 object-cover rounded-full">
               <span class="font-medium"><%= review.userName %></span>
             </div>
           </div>
@@ -208,6 +209,11 @@
     var span = document.getElementsByClassName("close")[0];
 
     btn.onclick = function() {
+      if ('<%= user %>' === '') {
+        window.location.href = '/login';
+        return;
+      }
+
       modal.style.display = "flex";
     }
 
@@ -221,7 +227,12 @@
       }
     }
 
-    async function addToCart(productId) {      
+    async function addToCart(productId) {
+      if ('<%= user %>' === '') {
+        window.location.href = '/login';
+        return;
+      }
+
       const cart = JSON.parse(localStorage.getItem('cart')) || [];
 
       if (cart.find(p => p.id === productId)) {
@@ -233,11 +244,27 @@
         quantity: 1
       });
 
+      fetch('/api/add-to-cart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          productId: productId,
+          quantity: 1
+        })
+      });
+
       localStorage.setItem('cart', JSON.stringify(cart));
       updateCartCounter();
     }
 
     async function addToWishList(productId) {
+      if ('<%= user %>' === '') {
+        window.location.href = '/login';
+        return;
+      }
+
       const wishList = JSON.parse(localStorage.getItem('wishlist')) || [];
 
       if (wishList.find(p => p.id === productId)) {
@@ -246,6 +273,16 @@
 
       wishList.push({
         id: productId,
+      });
+
+      fetch('/api/add-to-wishlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          productId: productId
+        })
       });
 
       localStorage.setItem('wishlist', JSON.stringify(wishList));

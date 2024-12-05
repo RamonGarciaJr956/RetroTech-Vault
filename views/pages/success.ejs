@@ -110,6 +110,10 @@
     localStorage.setItem('cart', JSON.stringify([]));
     localStorage.setItem('wishlist', JSON.stringify([]));
 
+    fetch('/api/cart', {
+      method: 'DELETE'
+    });
+
     updateCartCounter();
   </script>
 </body>

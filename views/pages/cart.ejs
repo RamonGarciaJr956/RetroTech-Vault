@@ -287,6 +287,17 @@
       const index = state.cartItems.findIndex(item => item.id === productId);
       state.cartItems[index].quantity = parseInt(quantity);
 
+      fetch('/api/update-cart', {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          productId,
+          quantity
+        })
+      })
+
       calculateSubTotal();
       updateShippingAndTax();
       updateOrderSummary();
@@ -297,6 +308,16 @@
       state.cartItems = state.cartItems.filter(item => item.id !== productId);
       const productElement = cartElement.querySelector(`[data-product-id="${productId}"]`);
       if (productElement) productElement.remove();
+
+      fetch('/api/remove-from-cart', {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          productId
+        })
+      })
 
       calculateSubTotal();
       updateShippingAndTax();
@@ -315,6 +336,26 @@
           });
         }
 
+        fetch('/api/add-to-wishlist', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            productId: productId
+          })
+        });
+
+        fetch('/api/remove-from-cart', {
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            productId
+          })
+        })
+
         const product = state.products.find(p => p.product.id === productId);
         if (product) {
           appendProductToWishlist(product.product);
@@ -327,6 +368,7 @@
         updateShippingAndTax();
         updateOrderSummary();
         updateLocalStorage();
+        updateCartCounter();
 
         document.getElementById('wishListCount').textContent = `${state.wishlistItems.length} items`;
       } catch (error) {
@@ -349,6 +391,27 @@
             appendProductToCart(product.product, 1);
           }
         }
+
+        fetch('/api/add-to-cart', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            productId: productId,
+            quantity: 1
+          })
+        });
+
+        fetch('/api/remove-from-wishlist', {
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            productId
+          })
+        })
 
         calculateSubTotal();
         updateShippingAndTax();
@@ -373,6 +436,16 @@
 
       document.getElementById('wishListCount').textContent = `${state.wishlistItems.length} items`;
       updateLocalStorage();
+
+      fetch('/api/remove-from-wishlist', {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          productId
+        })
+      })
     }
 
     function appendProductToCart(product, quantity) {

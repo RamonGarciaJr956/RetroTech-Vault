@@ -6,8 +6,8 @@ import Credentials from '@auth/express/providers/credentials';
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { db } from "./schema.js";
 import bcrypt from 'bcrypt';
-import { users, sessions, products, productReviews, productImages, productFeatures, orders, orderItems } from './schema.js';
-import { eq, sql, avg, count, desc, inArray, and, asc } from 'drizzle-orm';
+import { users, sessions, products, productReviews, productImages, productFeatures, orders, orderItems, cartItems, wishlistItems } from './schema.js';
+import { eq, sql, avg, count, desc, inArray, and } from 'drizzle-orm';
 import { v4 as uuid } from "uuid";
 import cors from 'cors';
 import { createRouteHandler } from "uploadthing/express";
@@ -16,9 +16,11 @@ import Stripe from 'stripe';
 import jwt from 'jsonwebtoken';
 import { PasswordResetEmailTemplate } from './email-templates/password-reset.js';
 import { AdminQuestionEmail } from './email-templates/question.js';
+import fs from 'fs';
+import { UTApi } from 'uploadthing/server';
 
 let stripe = Stripe(process.env.STRIPE_SECRET);
-
+const utapi = new UTApi();
 const app = express();
 const port = 8080;
 
@@ -246,7 +248,7 @@ app.use(
     router: uploadRouter,
     config: {
       maxBodySize: "10MB",
-      maxFiles: 4,
+      maxFiles: 1,
     },
   }),
 );
@@ -278,6 +280,7 @@ async function getProductWithDetails(productId) {
         title: productReviews.title,
         content: productReviews.content,
         createdAt: productReviews.createdAt,
+        image: users.image,
         userName: users.name
       })
       .from(productReviews)
@@ -299,6 +302,7 @@ async function getProductWithDetails(productId) {
       title: review.title,
       date: new Date(review.createdAt).toDateString(),
       content: review.content,
+      image: review.image,
       userName: review.userName
     }));
 
@@ -562,10 +566,8 @@ app.post('/api/quote-email', async (req, res) => {
   return res.status(200).json({ message: 'Question email sent' });
 });
 
-// Protected routes
-app.get('/shop', authenticatedUser, async (req, res) => {
+app.get('/shop', async (req, res) => {
   const { session } = res.locals;
-  const { consoleType, condition, sort, query } = req.query;
 
   try {
     const productsWithStats = await db
@@ -584,26 +586,8 @@ app.get('/shop', authenticatedUser, async (req, res) => {
         consoleType: products.consoleType
       })
       .from(products)
-      .where(
-        and(
-          consoleType ? eq(products.consoleType, consoleType) : undefined,
-          condition ? eq(products.condition, condition) : undefined,
-          query ? sql`LOWER(${products.name}) LIKE LOWER(${`%${query}%`})` : undefined
-        )
-      )
       .orderBy((() => {
-        switch (sort) {
-          case 'price-asc':
-            return asc(products.price);
-          case 'price-desc':
-            return desc(products.price);
-          case 'newest':
-            return desc(products.createdAt);
-          case 'best-selling':
-            return desc(products.isBestSeller);
-          default:
-            return desc(products.isBestSeller);
-        }
+        return desc(products.isBestSeller);
       })())
       .leftJoin(productReviews, eq(products.id, productReviews.productId))
       .groupBy(products.id)
@@ -631,6 +615,216 @@ app.get('/shop', authenticatedUser, async (req, res) => {
       user: session?.user
     });
   }
+});
+
+app.get('/product/:id', async (req, res) => {
+  const { session } = res.locals;
+  const { id } = req.params;
+
+  try {
+    const product = await getProductWithDetails(id);
+
+    if (!product) {
+      return res.status(404).render('pages/not_found', { user: session?.user });
+    }
+
+    res.render('pages/product', { product, user: session?.user });
+  } catch (error) {
+    console.error('Error fetching product details:', error);
+    res.status(500).render('pages/not_found', {
+      message: 'Error fetching product details',
+      user: session?.user
+    });
+  }
+});
+
+app.get('/product-card-template', async (req, res) => {
+  fs.readFile('views/partials/product_card.ejs', (err, data) => {
+    if (err) {
+      res.status(500).send('Error reading file');
+    } else {
+      res.set('Content-Type', 'text/plain');
+      res.send(data);
+    }
+  });
+});
+
+// Protected routes
+
+app.post('/api/upload-avatar', authenticatedUser, async (req, res) => {
+  try {
+    const { session } = res.locals;
+    const { image } = req.body;
+
+    const imageBuffer = Buffer.from(image, 'base64');
+
+    const uploadResponse = await utapi.uploadFiles(
+      new File([imageBuffer], `avatar-${session.user.id}.png`, {
+        type: 'image/png'
+      })
+    );
+
+    if (!uploadResponse.data) {
+      return res.status(500).json({ message: 'Upload failed' });
+    }
+
+    const uploadedImageUrl = uploadResponse.data.url;
+
+    await db
+      .update(users)
+      .set({ image: uploadedImageUrl })
+      .where(eq(users.id, session.user.id));
+
+    res.json({
+      message: 'Avatar uploaded successfully',
+      imageUrl: uploadedImageUrl
+    });
+
+  } catch (error) {
+    console.error('Avatar upload error:', error);
+    res.status(500).json({ message: 'Failed to upload avatar' });
+  }
+});
+
+app.post('/api/add-to-cart', authenticatedUser, async (req, res) => {
+  const { session } = res.locals;
+  const { productId, quantity = 1 } = req.body;
+  const userId = session.user.id;
+
+  try {
+    await db.insert(cartItems)
+      .values({
+        userId,
+        productId,
+        quantity
+      })
+      .onConflictDoNothing({
+        target: [cartItems.userId, cartItems.productId]
+      })
+
+    res.status(200).json({ message: 'Added to cart successfully' });
+  } catch (error) {
+    console.error('Error adding to cart:', error)
+    res.status(500).json({ message: 'Error adding to cart' });
+  }
+});
+
+app.post('/api/add-to-wishlist', authenticatedUser, async (req, res) => {
+  const { session } = res.locals;
+  const { productId } = req.body;
+  const userId = session.user.id;
+
+  try {
+    await db.insert(wishlistItems)
+      .values({
+        userId,
+        productId
+      })
+      .onConflictDoNothing({
+        target: [wishlistItems.userId, wishlistItems.productId]
+      })
+
+    res.status(200).json({ message: 'Added to wishlist successfully' });
+  } catch (error) {
+    console.error('Error adding to wishlist:', error)
+    res.status(500).json({ message: 'Error adding to wishlist' });
+  }
+});
+
+app.post('/api/remove-from-cart', authenticatedUser, async (req, res) => {
+  const { session } = res.locals;
+  const { productId } = req.body;
+  const userId = session.user.id;
+
+  try {
+    await db
+      .delete(cartItems)
+      .where(and(eq(cartItems.userId, userId), eq(cartItems.productId, productId)));
+
+    res.status(200).json({ message: 'Removed from cart successfully' });
+  } catch (error) {
+    console.error('Error removing from cart:', error)
+    res.status(500).json({ message: 'Error removing from cart' });
+  }
+});
+
+app.post('/api/remove-from-wishlist', authenticatedUser, async (req, res) => {
+  const { session } = res.locals;
+  const { productId } = req.body;
+  const userId = session.user.id;
+
+  try {
+    await db
+      .delete(wishlistItems)
+      .where(and(eq(wishlistItems.userId, userId), eq(wishlistItems.productId, productId)));
+
+    res.status(200).json({ message: 'Removed from wishlist successfully' });
+  } catch (error) {
+    console.error('Error removing from wishlist:', error)
+    res.status(500).json({ message: 'Error removing from wishlist' });
+  }
+});
+
+app.post('/api/update-cart', authenticatedUser, async (req, res) => {
+  const { session } = res.locals;
+  const { productId, quantity } = req.body;
+  const userId = session.user.id;
+
+  try {
+    await db
+      .update(cartItems)
+      .set({
+        quantity
+      })
+      .where(and(eq(cartItems.userId, userId), eq(cartItems.productId, productId)));
+
+    res.status(200).json({ message: 'Cart updated successfully' });
+  } catch (error) {
+    console.error('Error updating cart:', error)
+    res.status(500).json({ message: 'Error updating cart' });
+  }
+});
+
+app.delete('/api/cart', authenticatedUser, async (req, res) => {
+  const { session } = res.locals;
+  const userId = session.user.id;
+
+  try {
+    await db
+      .delete(cartItems)
+      .where(eq(cartItems.userId, userId));
+
+    await db
+      .delete(wishlistItems)
+      .where(eq(wishlistItems.userId, userId));
+
+    res.status(200).json({ message: 'Cart emptied successfully' });
+  } catch (error) {
+    console.error('Error emptying cart:', error)
+    res.status(500).json({ message: 'Error emptying cart' });
+  }
+});
+
+app.get('/api/cart', authenticatedUser, async (req, res) => {
+  const { session } = res.locals;
+  const userId = session.user.id;
+
+  const userCart = await db
+    .select()
+    .from(cartItems)
+    .where(eq(cartItems.userId, userId))
+    .leftJoin(products, eq(cartItems.productId, products.id));
+
+  const userWishlist = await db
+    .select()
+    .from(wishlistItems)
+    .where(eq(wishlistItems.userId, userId))
+    .leftJoin(products, eq(wishlistItems.productId, products.id));
+
+  res.json({
+    cart: userCart.length > 0 ? userCart : [],
+    wishlist: userWishlist.length > 0 ? userWishlist : []
+  });
 });
 
 app.get('/profile', authenticatedUser, async (req, res) => {
@@ -911,27 +1105,6 @@ app.post('/api/checkout', authenticatedUser, async (req, res) => {
   } catch (error) {
     console.error('Error creating checkout session:', error);
     res.status(500).json({ message: 'Error creating checkout session' });
-  }
-});
-
-app.get('/product/:id', authenticatedUser, async (req, res) => {
-  const { session } = res.locals;
-  const { id } = req.params;
-
-  try {
-    const product = await getProductWithDetails(id);
-
-    if (!product) {
-      return res.status(404).render('pages/not_found', { user: session?.user });
-    }
-
-    res.render('pages/product', { product, user: session?.user });
-  } catch (error) {
-    console.error('Error fetching product details:', error);
-    res.status(500).render('pages/not_found', {
-      message: 'Error fetching product details',
-      user: session?.user
-    });
   }
 });
 

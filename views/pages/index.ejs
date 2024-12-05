@@ -198,13 +198,15 @@
     function quoteEmail(event) {
       event.preventDefault();
       const email = document.querySelector('#quote-email input').value;
-      
+
       fetch('/api/quote-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ email })
+        body: JSON.stringify({
+          email
+        })
       }).then((res) => {
         if (res.ok) {
           alert_message('Success', 'Your quote request has been received. We will be in touch shortly.', 'green');
@@ -219,7 +221,7 @@
       if (alert) {
         alert.remove();
       }
-      
+
       const form = document.querySelector('#quote-email');
 
       const message_template = `
@@ -234,6 +236,28 @@
 
       form.insertAdjacentHTML('afterbegin', message_template);
     }
+
+    function loadCart() {
+      fetch('/api/cart')
+        .then((res) => res.json())
+        .then((data) => {
+          const cart = data.cart.map((item) => ({
+            id: item.cart_item.productId,
+            quantity: item.cart_item.quantity
+          }));
+
+          localStorage.setItem('cart', JSON.stringify(cart));
+
+          const wishlist = data.wishlist.map((item) => ({
+            id: item.wishlist_item.productId
+          }));
+          localStorage.setItem('wishlist', JSON.stringify(wishlist));
+
+          updateCartCounter();
+        });
+    }
+
+    loadCart();
   </script>
 </body>
 

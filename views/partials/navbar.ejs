@@ -11,6 +11,20 @@
       </a>
 
       <div class="hidden md:flex items-center space-x-1">
+
+        <div class="relative">
+          <input oninput="return navSearch(event)" type="text" class="w-72 bg-gray-800/50 text-white px-4 py-2 rounded-lg text-sm font-medium" placeholder="Search for products...">
+          <div class="absolute z-50 bg-gray-900 p-2 rounded-md invisible opacity-0 top-12 border border-white/10 shadow-lg group-focus-within:opacity-100 group-focus-within:visible transition-all duration-300 w-96">
+            <div class="item-list" class="flex flex-col divide-y divide-white/10">
+            </div>
+            <div class="mt-2 pt-2 border-t border-white/10 text-center">
+              <a href="/shop" class="text-sm text-purple-400 hover:text-purple-300 transition-colors">
+                View All Results
+              </a>
+            </div>
+          </div>
+        </div>
+
         <a href="/" class="relative px-3 py-2 text-sm font-medium text-white group">
           <span>Home</span>
           <span class="absolute inset-x-0 bottom-0 h-0.5 bg-purple-600 scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
@@ -74,17 +88,40 @@
           </button>
         </div>
       </div>
+
+      <button onclick="return showMobileMenu()" class="md:hidden">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu text-white">
+          <line x1="4" x2="20" y1="12" y2="12" />
+          <line x1="4" x2="20" y1="6" y2="6" />
+          <line x1="4" x2="20" y1="18" y2="18" />
+        </svg>
+      </button>
     </div>
 
     <div id="mobile-menu" class="hidden md:hidden border-t border-white/10">
       <div class="container mx-auto px-6 py-4 space-y-2">
+        <div class="relative">
+          <input oninput="return navSearch(event)" type="text" class="w-full bg-gray-800/50 text-white px-4 py-2 rounded-lg text-sm font-medium" placeholder="Search for products...">
+          <div class="absolute z-50 bg-gray-900 p-2 rounded-md invisible opacity-0 top-12 border border-white/10 shadow-lg group-focus-within:opacity-100 group-focus-within:visible transition-all duration-300 w-full max-w-96">
+            <div class="item-list" class="flex flex-col divide-y divide-white/10">
+            </div>
+            <div class="mt-2 pt-2 border-t border-white/10 text-center">
+              <a href="/shop" class="text-sm text-purple-400 hover:text-purple-300 transition-colors">
+                View All Results
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <hr class="border-white/10">
+
         <a href="/" class="block px-3 py-2 text-base font-medium text-white hover:bg-white/10 rounded-lg transition-colors duration-300">
           Home
         </a>
         <a href="/#services" class="block px-3 py-2 text-base font-medium text-white hover:bg-white/10 rounded-lg transition-colors duration-300">
           Services
         </a>
-        <a href="#" class="block px-3 py-2 text-base font-medium text-white hover:bg-white/10 rounded-lg transition-colors duration-300">
+        <a href="/shop" class="block px-3 py-2 text-base font-medium text-white hover:bg-white/10 rounded-lg transition-colors duration-300">
           Shop
         </a>
         <a href="/#about" class="block px-3 py-2 text-base font-medium text-white hover:bg-white/10 rounded-lg transition-colors duration-300">
@@ -95,6 +132,9 @@
         </a>
         <% if (user) { %>
         <hr class="border-white/10">
+        <a href="/cart" class="block px-3 py-2 text-base font-medium text-white hover:bg-white/10 rounded-lg transition-colors duration-300">
+          Cart
+        </a>
         <a href="/profile" class="block px-3 py-2 text-base font-medium text-white hover:bg-white/10 rounded-lg transition-colors duration-300">
           Profile
         </a>
@@ -116,6 +156,55 @@
     </div>
 
     <script>
+      function showMobileMenu() {
+        document.getElementById('mobile-menu').classList.toggle('hidden');
+      }
+
+      function navSearch(event) {
+        function productTemplate(name, description, price, image, url) {
+          return `
+            <a href="${url}"" class="flex items-center space-x-4 py-3 hover:bg-white/5 transition-colors duration-200 group">
+              <img src="${image}"" class="w-16 h-16 object-cover rounded-md" />
+              <div class="flex-1">
+                <p class="text-sm font-semibold text-white group-hover:text-purple-300 transition-colors">${name}</p>
+                <p class="text-xs text-gray-400">${description}</p>
+                <p class="text-sm font-bold text-purple-400">$${price}</p>
+              </div>
+              <i class="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" data-lucide="arrow-right"></i>
+            </a>
+          `;
+        }
+
+        if (event.target.value.length == 0) {
+          event.target.nextElementSibling.classList.add('invisible', 'opacity-0');
+          event.target.nextElementSibling.classList.remove('visible', 'opacity-100');
+          return;
+        }
+
+        const search = event.target.value;
+        fetch('/api/search?query=' + search)
+          .then(response => response.json())
+          .then(data => {
+            const searchResults = document.getElementsByClassName('item-list');
+            const visibleSearchResults = Array.from(searchResults).filter(itemList => {
+              const parentDiv = itemList.closest('.relative');
+              return parentDiv &&
+                !parentDiv.classList.contains('hidden') &&
+                parentDiv.offsetParent !== null;
+            });
+            visibleSearchResults[0].innerHTML = '';
+
+            if (event.target.value.length != 0) {
+              event.target.nextElementSibling.classList.remove('invisible', 'opacity-0');
+              event.target.nextElementSibling.classList.add('opacity-100', 'visible');
+
+              data.products.forEach(product => {
+                visibleSearchResults[0].innerHTML += productTemplate(product.name, product.description, product.price, product.image, "/product/" + product.id);
+              });
+            }
+          });
+      }
+
       function updateCartCounter() {
         const cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')) : [];
         const cartElementNav = document.getElementById('cart');
