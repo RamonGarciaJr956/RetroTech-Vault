@@ -165,11 +165,7 @@
             </div>
             <p class="text-gray-600 mb-4"><%= review.content %></p>
             <div class="flex items-center gap-2">
-              <%if(user && user.image) {%>
-              <img id="avatar" src="<%= user.image %>" alt="<%= user.userName %>" class="w-6 h-6 object-cover rounded-full">
-              <% } else { %>
-              <i data-lucide="user" class="w-6 h-6 text-gray-400"></i>
-              <% } %>
+              <img id="avatar" src="<%= review.image %>" alt="<%= review.userName %>" class="w-6 h-6 object-cover rounded-full">
               <span class="font-medium"><%= review.userName %></span>
             </div>
           </div>
