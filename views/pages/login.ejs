@@ -106,7 +106,8 @@
         const callbackInput = document.createElement('input');
         callbackInput.type = 'hidden';
         callbackInput.name = 'callbackUrl';
-        callbackInput.value = window.location.host;
+        const url = new URL(window.location.href);
+        callbackInput.value = url.origin;
         form.appendChild(callbackInput);
 
         document.body.appendChild(form);
