@@ -3,6 +3,10 @@
 # RetroTech Vault
 This is a mock e-commerce website created for the CYBI 6314 course. The project simulates an online store for restoring and selling retro gaming consoles.
 
+## Demo
+I will most likely take this down after a month.\
+[RetroTech Vault Demo Website](http://107.191.55.194:8080)
+
 ## Project Status
 - Under Development - may revisit in the future.
 
