@@ -106,7 +106,7 @@
         const callbackInput = document.createElement('input');
         callbackInput.type = 'hidden';
         callbackInput.name = 'callbackUrl';
-        callbackInput.value = process.env.DOMAIN;
+        callbackInput.value = window.location.host;
         form.appendChild(callbackInput);
 
         document.body.appendChild(form);
