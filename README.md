@@ -35,10 +35,10 @@ Note: This is a fictional website created solely for educational purposes and is
 ### Requirements
 You need to have npm and nodejs installed **nodejs version must be greater than 20.x**.
 
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install all needed dependencies.
+Use the node package manager [npm](https://nodejs.org/en) to install all needed dependencies npm comes with nodejs.
 
 ```bash
-pip install
+npm install
 ```
 
 Next, make sure to configure all the environment variables rename the .env.example file to just .env, and fill in all the variables.
