@@ -5,7 +5,7 @@ This is a mock e-commerce website created for the CYBI 6314 course. The project 
 
 ## Demo
 I will most likely take this down after a month.\
-[RetroTech Vault Demo Website](http://107.191.55.194:8080)
+Demo is no longer available
 
 ## Project Status
 - Under Development - may revisit in the future.
